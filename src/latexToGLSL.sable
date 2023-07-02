@@ -1,0 +1,201 @@
+
+/*************************************************************************/
+  
+Package latexToGLSL;
+
+/*************************************************************************/
+    
+
+Helpers
+
+
+/* Caracteres */
+
+
+ letra = ['a'..'z'] | ['A'..'Z'];
+ digito = ['0'..'9'];
+ espaco = ' ';
+ tudo = [0..255];
+ 
+ 
+/* Retorno */
+
+
+ rc = 13; //carriage return
+ nl = 10; //new line
+ tab = 9;  //tabulacao
+ tudo_sem_retorno = [tudo - [rc + nl]];
+ tudo_sem_chave = [tudo - '}'];
+ tudo_sem_aspas = [tudo - '''];
+
+
+/*************************************************************************/
+
+
+Tokens
+
+
+/* Palavras reservadas */
+
+
+ tk_equation = 'equation';
+ tk_array = 'array';
+ tk_begin = '\begin';
+ tk_end = '\end';
+ tk_lf_lbrace = '\lbrace';
+ tk_lf_rbrace = '\rbrace';
+ tk_lf_operatorname = '\operatorname';
+ tk_lf_displaystyle = '\displaystyle'; 
+ tk_lf_mathbf = '\mathbf';
+ tk_lf_espaco = '\\';
+ tk_lf_sifao = '$';
+ 
+
+/* Operadores */
+
+
+ tk_igual = '=';
+ tk_soma = '+';
+ tk_subt = '-';
+ tk_mult = '*';
+ tk_div = '/';
+ tk_mod = '%';
+ tk_pot = '^';
+ tk_l_par = '(';
+ tk_r_par = ')';
+ tk_l_col = '[';
+ tk_r_col = ']';
+ tk_l_chave = '{';
+ tk_r_chave = '}';
+ tk_underline = '_';
+ tk_virgula = ',';
+ tk_pipe = '|';
+ tk_maior = '>';
+ tk_menor = '<';
+ tk_maiorigual = '>=';
+ tk_menorigual = '<=';
+ 
+ 
+/* Funções Algebra Linear */ 
+ 
+ 
+ tk_times = '\times'; /*cross product*/ 
+ tk_cdot = '\cdot';
+ tk_vec = '\vec';
+ tk_sum = '\sum';
+ tk_prod = '\prod';
+ 
+ 
+/* Funções Matemáticas */ 
+ 
+ 
+ tk_min = '\min';
+ tk_max = '\max';
+ tk_frac = '\frac';
+ tk_exp = '\exp';
+ tk_sqrt = '\sqrt';
+ tk_lim = '\lim';
+ tk_to = '\to'; 
+ tk_infty = '\infty';
+ tk_integral = '\int';
+ tk_degree = '\circ';
+ tk_unf_letra = '\mathrm';
+ tk_pipe_mid = '\mid';
+ tk_leftarrow = '\leftarrow'; 
+ tk_la_gets = '\gets';
+ tk_rightarrow = '\rightarrow';
+ tk_double_pipe = '\|';
+ 
+ 
+/* Funções Trigonométricas */ 
+ 
+ 
+ tk_cos = '\cos';
+ tk_sin = '\sin';
+ tk_tan = '\tan';
+ tk_cot = '\cot';
+ tk_arcsin = '\arcsin';
+ tk_arccos = '\arccos';
+ tk_arctan = '\arctan';
+ tk_arccot = '\arccot';
+ tk_sinh = '\sinh';
+ tk_cosh = '\cosh';
+ tk_tanh = '\tanh';
+ tk_coth = '\coth';
+ tk_sec = '\sec';
+ tk_csc = '\csc';
+ 
+ 
+/* Alfabeto Grego */
+ 
+ 
+ tk_alpha = '\alpha';
+ tk_beta = '\beta';
+ tk_gamma = '\gamma';
+ tk_up_gamma = '\Gamma';
+ tk_delta = '\delta';
+ tk_up_delta = '\Delta';
+ tk_epsilon = '\epsilon';
+ tk_varepsilon = '\varepsilon';
+ tk_zeta = '\zeta';
+ tk_eta = '\eta';
+ tk_theta = '\theta';
+ tk_up_theta = '\Theta';
+ tk_vartheta = '\vartheta';
+ tk_iota = '\iota';
+ tk_kappa = '\kappa'; 
+ tk_varkappa = '\varkappa';
+ tk_lambda = '\lambda';
+ tk_up_lambda = '\Lambda';
+ tk_mu = '\mu';
+ tk_nu = '\nu';
+ tk_xi = '\xi';
+ tk_up_xi = '\Xi';
+ tk_pi = '\pi';
+ tk_up_pi = '\Pi';
+ tk_varpi = '\varpi';
+ tk_rho = '\rho';
+ tk_varrho = '\varrho';
+ tk_sigma = '\sigma';
+ tk_up_sigma = '\Sigma';
+ tk_varsigma = '\varsigma';
+ tk_tau = '\tau';
+ tk_upsilon = '\upsilon';
+ tk_up_upsilon = '\Upsilon';
+ tk_phi = '\phi';
+ tk_up_phi = '\Phi';
+ tk_varphi = '\varphi';
+ tk_chi = '\chi';
+ tk_psi = '\psi';
+ tk_up_psi = '\Psi';
+ tk_omega = '\omega';
+ tk_up_omega = '\Omega';
+ 
+ 
+/* Caracteres */
+
+
+/* tk_frase =  aspas tudo_sem_aspas* aspas; */
+ tk_num_inteiro = (digito+);
+ tk_num_real = (digito+ ',' digito+);
+ tk_identificador = (letra+); 
+
+
+/* Ignorados */
+
+
+ vazio = (espaco | rc | nl | tab)+;
+/* comentario_linha = ('--' tudo_sem_retorno*); */
+/* comentario_bloco = ('{' tudo_sem_chave* '}')+; */
+ 
+ 
+/*************************************************************************/
+
+Ignored Tokens
+
+ vazio;
+
+
+/*************************************************************************/
+
+
