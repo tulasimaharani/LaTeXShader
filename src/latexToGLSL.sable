@@ -61,12 +61,12 @@ Tokens
  tk_div = '/';
  tk_mod = '%';
  tk_pot = '^';
- tk_l_par = '(';
- tk_r_par = ')';
- tk_l_col = '[';
- tk_r_col = ']';
- tk_l_chave = '{';
- tk_r_chave = '}';
+ tk_par_left = '(';
+ tk_par_right  = ')';
+ tk_col_left  = '[';
+ tk_col_right = ']';
+ tk_chave_left  = '{';
+ tk_chave_right = '}';
  tk_underline = '_';
  tk_virgula = ',';
  tk_pipe = '|';
@@ -195,7 +195,155 @@ Ignored Tokens
 
  vazio;
 
-
 /*************************************************************************/
 
+Productions
 
+ declaracao_inicial = 
+	  bloco_equation;
+ 
+ bloco_equation = 
+ 	  bloco_inicio exp* bloco_fim;
+
+ bloco_inicio = 
+ 	  tk_begin tk_chave_left tk_equation tk_chave_right;
+
+ bloco_fim = 
+ 	  tk_end tk_chave_left tk_equation tk_chave_right;
+
+ colchetes = 
+ 	  tk_col_left exp tk_col_right;
+
+ parenteses = 
+	  tk_par_left exp tk_par_right;
+ 
+ chaves =
+	  tk_chave_left exp tk_chave_right;
+	
+ exp =
+ 	  {exp_numerica} exp_numerica
+ 	| {igual} exp tk_igual exp_numerica
+ 	| {maior_igual} exp tk_maiorigual exp_numerica
+	| {menor_igual} exp tk_menorigual exp_numerica
+ 	| {maior} exp tk_maior exp_numerica
+	| {menor} exp tk_menor exp_numerica;
+
+ exp_numerica =
+      {fator} fator 
+ 	| {soma} exp_numerica tk_soma fator 
+ 	| {dim} exp_numerica tk_subt fator;
+
+ fator =
+ 	  {termo} termo 
+ 	| {mult} fator tk_mult termo 
+ 	| {div} fator tk_div termo 
+  	| {mod} fator tk_mod termo
+	| {pot} fator tk_pot termo;
+  
+ termo =
+ 	  {valor} valor
+    | {numero} numero 
+  	| {parenteses} parenteses
+  	| {colchetes} colchetes;
+ 
+ numero = 
+ 	  {tk_num_inteiro} tk_num_inteiro
+ 	| {tk_num_real} tk_num_real;
+
+ valor = 
+ 	  {identificador} tk_identificador
+	| {id_reservado} id_reservado
+ 	| {valor} valor chaves;
+
+ id_reservado = 	
+	  {funcao_algebra} funcao_algebra
+	| {funcao_matematica} funcao_matematica
+	| {funcao_trigonometrica} funcao_trigonometrica
+	| {funcao_alfabetogrego} funcao_alfabetogrego;
+	
+ funcao_algebra = 
+	  {tk_times} tk_times
+	| {tk_cdot} tk_cdot
+	| {tk_vec} tk_vec
+	| {tk_sum} tk_sum
+	| {tk_prod} tk_prod;
+ 
+ funcao_matematica = 
+	  {tk_min} tk_min
+	| {tk_max} tk_max
+	| {tk_frac} tk_frac
+	| {tk_exp} tk_exp
+	| {tk_sqrt} tk_sqrt
+	| {tk_lim} tk_lim
+	| {tk_to} tk_to
+	| {tk_infty} tk_infty
+	| {tk_integral} tk_integral
+	| {tk_degree} tk_degree
+	| {tk_unf_letra} tk_unf_letra
+	| {tk_pipe_mid} tk_pipe_mid
+	| {tk_leftarrow} tk_leftarrow
+	| {tk_la_gets} tk_la_gets
+	| {tk_rightarrow} tk_rightarrow
+	| {tk_double_pipe} tk_double_pipe;
+ 
+ funcao_trigonometrica =
+	  {tk_cos} tk_cos
+	| {tk_sin} tk_sin
+	| {tk_tan} tk_tan
+	| {tk_cot} tk_cot
+	| {tk_arcsin} tk_arcsin
+	| {tk_arccos} tk_arccos
+	| {tk_arctan} tk_arctan
+	| {tk_arccot} tk_arccot
+	| {tk_sinh} tk_sinh
+	| {tk_cosh} tk_cosh
+	| {tk_tanh} tk_tanh
+	| {tk_coth} tk_coth
+	| {tk_sec} tk_sec
+	| {tk_csc} tk_csc;
+ 
+ funcao_alfabetogrego =
+	  {tk_alpha} tk_alpha
+	| {tk_beta} tk_beta
+	| {tk_gamma} tk_gamma
+	| {tk_up_gamma} tk_up_gamma
+	| {tk_delta} tk_delta
+	| {tk_up_delta} tk_up_delta
+	| {tk_epsilon} tk_epsilon
+	| {tk_varepsilon} tk_varepsilon
+	| {tk_zeta} tk_zeta
+	| {tk_eta} tk_eta
+	| {tk_theta} tk_theta
+	| {tk_up_theta} tk_up_theta
+	| {tk_vartheta} tk_vartheta
+	| {tk_iota} tk_iota
+	| {tk_kappa} tk_kappa
+	| {tk_varkappa} tk_varkappa
+	| {tk_lambda} tk_lambda
+	| {tk_up_lambda} tk_up_lambda
+	| {tk_mu} tk_mu
+	| {tk_nu} tk_nu
+	| {tk_xi} tk_xi
+	| {tk_up_xi} tk_up_xi
+	| {tk_pi} tk_pi
+	| {tk_up_pi} tk_up_pi
+	| {tk_varpi} tk_varpi
+	| {tk_rho} tk_rho
+	| {tk_varrho} tk_varrho
+	| {tk_sigma} tk_sigma
+	| {tk_up_sigma} tk_up_sigma
+	| {tk_varsigma} tk_varsigma
+	| {tk_tau} tk_tau
+	| {tk_upsilon} tk_upsilon
+	| {tk_up_upsilon} tk_up_upsilon
+	| {tk_phi} tk_phi
+	| {tk_up_phi} tk_up_phi
+	| {tk_varphi} tk_varphi
+	| {tk_chi} tk_chi
+	| {tk_psi} tk_psi
+	| {tk_up_psi} tk_up_psi
+	| {tk_omega} tk_omega
+	| {tk_up_omega} tk_up_omega
+	| {funcao_alfabetogrego} funcao_alfabetogrego tk_underline chaves;
+	
+	
