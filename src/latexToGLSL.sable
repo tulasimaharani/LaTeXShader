@@ -76,7 +76,7 @@ Tokens
  tk_menorigual = '<=';
  
  
-/* FunÃ§Ãµes Algebra Linear */ 
+/* Funções Algebra Linear */ 
  
  
  tk_times = '\times'; /*cross product*/ 
@@ -86,13 +86,16 @@ Tokens
  tk_prod = '\prod';
  
  
-/* FunÃ§Ãµes MatemÃ¡ticas */ 
+/* Funções Matemáticas */ 
  
  
  tk_min = '\min';
  tk_max = '\max';
  tk_frac = '\frac';
  tk_exp = '\exp';
+ tk_log = '\log';
+ tk_ln = '\ln';
+ tk_lg = '\lg';
  tk_sqrt = '\sqrt';
  tk_lim = '\lim';
  tk_to = '\to'; 
@@ -107,9 +110,8 @@ Tokens
  tk_double_pipe = '\|';
  
  
-/* FunÃ§Ãµes TrigonomÃ©tricas */ 
- 
- 
+/* Funções Trigonométricas */ 
+	
  tk_cos = '\cos';
  tk_sin = '\sin';
  tk_tan = '\tan';
@@ -178,6 +180,7 @@ Tokens
 /* tk_frase =  aspas tudo_sem_aspas* aspas; */
  tk_num_inteiro = (digito+);
  tk_num_real = (digito+ ',' digito+);
+ tk_num_negativo = '-'((digito+) | (digito+ ',' digito+));
  tk_identificador = (letra+); 
 
 
@@ -203,7 +206,7 @@ Productions
 	  bloco_equation;
  
  bloco_equation = 
- 	  bloco_inicio exp* bloco_fim;
+ 	  bloco_inicio exp+ bloco_fim;
 
  bloco_inicio = 
  	  tk_begin tk_chave_left tk_equation tk_chave_right;
@@ -219,6 +222,10 @@ Productions
  
  chaves =
 	  tk_chave_left exp tk_chave_right;
+	
+// exp_negativa = 
+	
+// exponenciacao = 
 	
  exp =
  	  {exp_numerica} exp_numerica
@@ -238,54 +245,110 @@ Productions
  	| {mult} fator tk_mult termo 
  	| {div} fator tk_div termo 
   	| {mod} fator tk_mod termo
-	| {pot} fator tk_pot termo;
+  	| {pot} fator tk_pot termo;
   
  termo =
  	  {valor} valor
-    | {numero} numero 
+    | {numero} numero
   	| {parenteses} parenteses
-  	| {colchetes} colchetes;
+  	| {colchetes} colchetes
+  	| {chaves} chaves;
  
  numero = 
- 	  {tk_num_inteiro} tk_num_inteiro
+ 	  {tk_num_negativo} tk_num_negativo	
+ 	| {tk_num_inteiro} tk_num_inteiro
  	| {tk_num_real} tk_num_real;
 
  valor = 
  	  {identificador} tk_identificador
 	| {id_reservado} id_reservado
- 	| {valor} valor chaves;
+	| {id_modificado} id_reservado tk_underline chaves
+	| {funcao_operador_custom} tk_lf_operatorname chaves;
 
  id_reservado = 	
 	  {funcao_algebra} funcao_algebra
 	| {funcao_matematica} funcao_matematica
-	| {funcao_trigonometrica} funcao_trigonometrica
-	| {funcao_alfabetogrego} funcao_alfabetogrego;
+	| {funcao_alfabetogrego} funcao_alfabetogrego
+	| {equacao_trig} equacao_trig;
+	
+	
+/************ Funções Algebra Linear ************/
+	
 	
  funcao_algebra = 
-	  {tk_times} tk_times
-	| {tk_cdot} tk_cdot
-	| {tk_vec} tk_vec
-	| {tk_sum} tk_sum
-	| {tk_prod} tk_prod;
+	  {times} fa_times
+	| {cdot} fa_cdot
+	| {sum} fa_sum
+	| {prod} fa_prod
+	| {vec} fa_vec;
+	
+ fa_times = 
+      [left]:chaves tk_times [right]:chaves; /* a\times b */
+	
+ fa_cdot = 
+	  [left]:chaves tk_cdot [right]:chaves;  /* a\cdot b */
+	
+ fa_sum =
+      tk_sum tk_underline [left]:chaves tk_pot [right]:chaves; /* \sum_{}^{} */
+  
+ fa_prod =
+      tk_prod tk_underline [left]:chaves tk_pot [right]:chaves; /* \prod_{}^{} */
+  
+ fa_vec = 
+	  {vec_id} tk_vec tk_identificador 
+	| {vec_chave} tk_vec chaves; /* \vec a */
+
+
  
+/************ Funções Matemáticas ************/
+	
+	
  funcao_matematica = 
-	  {tk_min} tk_min
-	| {tk_max} tk_max
-	| {tk_frac} tk_frac
-	| {tk_exp} tk_exp
-	| {tk_sqrt} tk_sqrt
-	| {tk_lim} tk_lim
-	| {tk_to} tk_to
-	| {tk_infty} tk_infty
-	| {tk_integral} tk_integral
-	| {tk_degree} tk_degree
-	| {tk_unf_letra} tk_unf_letra
-	| {tk_pipe_mid} tk_pipe_mid
-	| {tk_leftarrow} tk_leftarrow
-	| {tk_la_gets} tk_la_gets
-	| {tk_rightarrow} tk_rightarrow
-	| {tk_double_pipe} tk_double_pipe;
+	  {fm_min} fm_min
+	| {fm_max} fm_max
+	| {fm_frac} fm_frac
+	| {fm_exp} fm_exp
+//	| {fm_log} fm_log //
+//	| {fm_ln} fm_ln //
+//	| {fm_lg} fm_lg //
+	| {fm_sqrt} fm_sqrt
+	| {fm_lim} fm_lim
+//	| {fm_to} fm_to
+//	| {fm_infty} fm_infty
+	| {fm_integral} fm_integral;
+//	| {fm_degree} fm_degree  //
+//	| {fm_unf_letra} fm_unf_letra //
+//	| {fm_pipe_mid} fm_pipe_mid //
+//	| {fm_leftarrow} fm_leftarrow //
+//	| {fm_la_gets} fm_la_gets //
+//	| {fm_rightarrow} fm_rightarrow //
+//	| {fm_double_pipe} fm_double_pipe //
+	
+  fm_min = 
+		tk_min parenteses; //(exp , exp ...)
+		
+  fm_max = 
+		tk_max parenteses;
+		
+  fm_frac = 
+		tk_frac [left]:chaves [right]:chaves;
+	 
+  fm_sqrt = 
+		tk_sqrt chaves;
+		
+  fm_lim =
+		tk_lim tk_underline tk_chave_left tk_identificador tk_to tk_infty tk_chave_right;  /* \lim_{x \to 0}  */
+	 
+  fm_integral = 
+		tk_integral tk_underline [left]:chaves tk_pot [right]:chaves;  /* \int_{}^{} */
  
+  fm_exp =
+  		tk_exp colchetes;
+  		 
+ 
+/************ Funções Trigonométricas ************/
+	
+	
  funcao_trigonometrica =
 	  {tk_cos} tk_cos
 	| {tk_sin} tk_sin
@@ -300,8 +363,15 @@ Productions
 	| {tk_tanh} tk_tanh
 	| {tk_coth} tk_coth
 	| {tk_sec} tk_sec
-	| {tk_csc} tk_csc;
+	| {tk_csc} tk_csc;  /* \cos^2n || \cos n */
  
+ equacao_trig = 
+	  funcao_trigonometrica tk_pot [expoente]:exp_numerica [valor_trig]:chaves;  /* \int_{}^{} */
+ 
+ 	
+/************ Alfabeto Grego ************/
+ 	
+ 	
  funcao_alfabetogrego =
 	  {tk_alpha} tk_alpha
 	| {tk_beta} tk_beta
@@ -343,7 +413,6 @@ Productions
 	| {tk_psi} tk_psi
 	| {tk_up_psi} tk_up_psi
 	| {tk_omega} tk_omega
-	| {tk_up_omega} tk_up_omega
-	| {funcao_alfabetogrego} funcao_alfabetogrego tk_underline chaves;
+	| {tk_up_omega} tk_up_omega;
 	
 	
