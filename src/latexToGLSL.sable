@@ -27,7 +27,7 @@ Helpers
  tudo_sem_retorno = [tudo - [rc + nl]];
  tudo_sem_chave = [tudo - '}'];
  tudo_sem_aspas = [tudo - '''];
-
+ lf_espaco = '\\';
 
 /*************************************************************************/
 
@@ -47,7 +47,6 @@ Tokens
  tk_lf_operatorname = '\operatorname';
  tk_lf_displaystyle = '\displaystyle'; 
  tk_lf_mathbf = '\mathbf';
- tk_lf_espaco = '\\';
  tk_lf_sifao = '$';
  
 
@@ -180,7 +179,6 @@ Tokens
 /* tk_frase =  aspas tudo_sem_aspas* aspas; */
  tk_num_inteiro = (digito+);
  tk_num_real = (digito+ ',' digito+);
- tk_num_negativo = '-'((digito+) | (digito+ ',' digito+));
  tk_identificador = (letra+); 
 
 
@@ -188,6 +186,7 @@ Tokens
 
 
  vazio = (espaco | rc | nl | tab)+;
+ espaco = lf_espaco+;
 /* comentario_linha = ('--' tudo_sem_retorno*); */
 /* comentario_bloco = ('{' tudo_sem_chave* '}')+; */
  
@@ -196,17 +195,21 @@ Tokens
 
 Ignored Tokens
 
- vazio;
+ vazio, espaco;
 
 /*************************************************************************/
 
 Productions
 
  declaracao_inicial = 
-	  bloco_equation;
+	  bloco_inicio bloco_equation bloco_fim;
  
  bloco_equation = 
- 	  bloco_inicio exp+ bloco_fim;
+ 	    {exp} exp 
+ 	  | {bloco_array} bloco_array;
+
+ bloco_array = 
+ 	  bloco_inicio_array array bloco_fim_array;
 
  bloco_inicio = 
  	  tk_begin tk_chave_left tk_equation tk_chave_right;
@@ -214,19 +217,32 @@ Productions
  bloco_fim = 
  	  tk_end tk_chave_left tk_equation tk_chave_right;
 
+ bloco_inicio_array = 
+ 	  tk_begin tk_chave_left tk_array tk_chave_right;
+
+ bloco_fim_array = 
+ 	  tk_end tk_chave_left tk_array tk_chave_right;
+
  colchetes = 
  	  tk_col_left exp tk_col_right;
 
  parenteses = 
 	  tk_par_left exp tk_par_right;
  
- chaves =
+ tex_chaves =
 	  tk_chave_left exp tk_chave_right;
-	
-// exp_negativa = 
-	
-// exponenciacao = 
-	
+	  
+ parametros = 
+	  exp_numerica parametos_tail*;
+	  
+ parametos_tail =  
+ 	  tk_virgula exp_numerica;
+
+ array = exp array_tail*;
+ 
+ array_tail =  
+ 	  tk_virgula exp;
+
  exp =
  	  {exp_numerica} exp_numerica
  	| {igual} exp tk_igual exp_numerica
@@ -241,36 +257,43 @@ Productions
  	| {dim} exp_numerica tk_subt fator;
 
  fator =
- 	  {termo} termo 
- 	| {mult} fator tk_mult termo 
- 	| {div} fator tk_div termo 
-  	| {mod} fator tk_mod termo
-  	| {pot} fator tk_pot termo;
+ 	  {termo} fator_expo 
+ 	| {mult} fator tk_mult fator_expo 
+ 	| {div} fator tk_div fator_expo 
+  	| {mod} fator tk_mod fator_expo;
+  	
+ fator_expo = 
+ 	  {termo} termo
+ 	| {pot} termo tk_pot fator_expo;
   
  termo =
  	  {valor} valor
     | {numero} numero
   	| {parenteses} parenteses
   	| {colchetes} colchetes
-  	| {chaves} chaves;
+  	| {tex_chaves} tex_chaves
+  	| {negativo} tk_subt termo;
  
  numero = 
- 	  {tk_num_negativo} tk_num_negativo	
- 	| {tk_num_inteiro} tk_num_inteiro
+ 	  {tk_num_inteiro} tk_num_inteiro
  	| {tk_num_real} tk_num_real;
 
  valor = 
  	  {identificador} tk_identificador
 	| {id_reservado} id_reservado
-	| {id_modificado} id_reservado tk_underline chaves
-	| {funcao_operador_custom} tk_lf_operatorname chaves;
-
- id_reservado = 	
+	| {id_modificado} valor tk_underline tex_chaves; /* F_{0} */
+	
+ id_reservado = 
 	  {funcao_algebra} funcao_algebra
 	| {funcao_matematica} funcao_matematica
 	| {funcao_alfabetogrego} funcao_alfabetogrego
-	| {equacao_trig} equacao_trig;
+	| {equacao_trig} equacao_trig
+	| {funcao_operador_custom} 
+		tk_lf_operatorname tk_chave_left tk_identificador tk_chave_right tk_par_left parametros tk_par_right
+		 /* \operatorname{Func}(f,h) */
+	| {lf_style} tk_lf_displaystyle tk_identificador;
 	
+
 	
 /************ Funções Algebra Linear ************/
 	
@@ -283,20 +306,20 @@ Productions
 	| {vec} fa_vec;
 	
  fa_times = 
-      [left]:chaves tk_times [right]:chaves; /* a\times b */
+      [left]:tex_chaves tk_times [right]:tex_chaves; /* {a}\times{b} */
 	
  fa_cdot = 
-	  [left]:chaves tk_cdot [right]:chaves;  /* a\cdot b */
+	  [left]:tex_chaves tk_cdot [right]:tex_chaves;  /* {a}\cdot{b} */
 	
  fa_sum =
-      tk_sum tk_underline [left]:chaves tk_pot [right]:chaves; /* \sum_{}^{} */
+      tk_sum tk_underline [left]:tex_chaves tk_pot [right]:tex_chaves; /* \sum_{}^{} */
   
  fa_prod =
-      tk_prod tk_underline [left]:chaves tk_pot [right]:chaves; /* \prod_{}^{} */
+      tk_prod tk_underline [left]:tex_chaves tk_pot [right]:tex_chaves; /* \prod_{}^{} */
   
  fa_vec = 
 	  {vec_id} tk_vec tk_identificador 
-	| {vec_chave} tk_vec chaves; /* \vec a */
+	| {vec_chave} tk_vec tex_chaves; /* \vec{a} */
 
 
  
@@ -325,27 +348,28 @@ Productions
 //	| {fm_double_pipe} fm_double_pipe //
 	
   fm_min = 
-		tk_min parenteses; //(exp , exp ...)
+		tk_min tk_par_left parametros tk_par_right;
 		
   fm_max = 
-		tk_max parenteses;
+		tk_max tk_par_left parametros tk_par_right;
 		
   fm_frac = 
-		tk_frac [left]:chaves [right]:chaves;
+		tk_frac [left]:tex_chaves [right]:tex_chaves;
 	 
   fm_sqrt = 
-		tk_sqrt chaves;
+		tk_sqrt tex_chaves;
 		
   fm_lim =
 		tk_lim tk_underline tk_chave_left tk_identificador tk_to tk_infty tk_chave_right;  /* \lim_{x \to 0}  */
 	 
   fm_integral = 
-		tk_integral tk_underline [left]:chaves tk_pot [right]:chaves;  /* \int_{}^{} */
+		tk_integral tk_underline [left]:tex_chaves tk_pot [right]:tex_chaves;  /* \int_{}^{} */
  
   fm_exp =
   		tk_exp colchetes;
   		 
- 
+
+
 /************ Funções Trigonométricas ************/
 	
 	
@@ -363,11 +387,15 @@ Productions
 	| {tk_tanh} tk_tanh
 	| {tk_coth} tk_coth
 	| {tk_sec} tk_sec
-	| {tk_csc} tk_csc;  /* \cos^2n || \cos n */
+	| {tk_csc} tk_csc;
  
  equacao_trig = 
-	  funcao_trigonometrica tk_pot [expoente]:exp_numerica [valor_trig]:chaves;  /* \int_{}^{} */
+	  funcao_trigonometrica equacao_trig_expo? tex_chaves;
  
+ equacao_trig_expo = 
+ 	  tk_pot tex_chaves;
+ 	
+ 	
  	
 /************ Alfabeto Grego ************/
  	
