@@ -229,28 +229,28 @@ Productions
          {-> a_bloco_inicio  } =
 
      {bloco_inicio} tk_begin tk_chave_left tk_equation tk_chave_right 
-         {-> New a_bloco_inicio (tk_begin , tk_chave_left , tk_equation , tk_chave_right  )  }  
+         {-> New a_bloco_inicio ( )  }  
      ;
 
  bloco_fim
          {-> a_bloco_fim  } =
 
      {bloco_fim} tk_end tk_chave_left tk_equation tk_chave_right 
-         {-> New a_bloco_fim (tk_end , tk_chave_left , tk_equation , tk_chave_right  )  }  
+         {-> New a_bloco_fim ( )  }  
      ;
 
  bloco_inicio_array
          {-> a_bloco_inicio_array  } =
 
      {bloco_inicio_array} tk_begin tk_chave_left tk_array tk_chave_right 
-         {-> New a_bloco_inicio_array (tk_begin , tk_chave_left , tk_array , tk_chave_right  )  }  
+         {-> New a_bloco_inicio_array ( )  }  
      ;
 
  bloco_fim_array
          {-> a_bloco_fim_array  } =
 
      {bloco_fim_array} tk_end tk_chave_left tk_array tk_chave_right 
-         {-> New a_bloco_fim_array (tk_end , tk_chave_left , tk_array , tk_chave_right  )  }  
+         {-> New a_bloco_fim_array ( )  }  
      ;
 
  colchetes
@@ -771,20 +771,16 @@ Abstract Syntax Tree
 	 a_bloco_inicio_array a_array a_bloco_fim_array
 	 ;
 	
-	a_bloco_inicio =
-	 tk_begin tk_chave_left tk_equation tk_chave_right    
+	a_bloco_inicio =   
 	 ;
 	
-	a_bloco_fim =
-     tk_end tk_chave_left tk_equation tk_chave_right   
+	a_bloco_fim =   
      ;
 	
-	a_bloco_inicio_array =
-	 tk_begin tk_chave_left tk_array tk_chave_right 
+	a_bloco_inicio_array = 
 	 ;
 	
-	a_bloco_fim_array =
-	 tk_end tk_chave_left tk_array tk_chave_right 
+	a_bloco_fim_array =  
 	 ;
 
 	a_array =
