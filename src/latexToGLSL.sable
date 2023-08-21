@@ -424,7 +424,7 @@ Productions
          {-> New a_exp.a_funcao_alfabetogrego ( funcao_alfabetogrego.a_funcao_alfabetogrego ) }   |
 
      {lf_operador_custom} tk_lf_operatorname tk_chave_left tk_identificador tk_chave_right tk_par_left parametros tk_par_right 
-         {-> New a_exp.a_lf_operador_custom ( parametros.a_parametros )  }   |
+         {-> New a_exp.a_lf_operador_custom (tk_identificador, parametros.a_parametros )  }   |
 
      {lf_style} tk_lf_displaystyle tk_identificador 
          {-> New a_exp.a_lf_style (tk_lf_displaystyle , tk_identificador  )  }  
@@ -814,7 +814,7 @@ Abstract Syntax Tree
      {a_identificador} tk_identificador | 
      {a_funcao_alfabetogrego} a_funcao_alfabetogrego | 
      {a_equacao_trig} a_funcao_trigonometrica a_equacao_trig_expo? a_exp | 
-     {a_lf_operador_custom} a_parametros | 
+     {a_lf_operador_custom} tk_identificador a_parametros | 
      {a_lf_style} tk_lf_displaystyle tk_identificador |
  	 {a_fa_times} [left]:a_exp [right]:a_exp |
  	 {a_fa_cdot} [left]:a_exp [right]:a_exp |
