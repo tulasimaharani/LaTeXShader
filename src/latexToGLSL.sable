@@ -222,7 +222,7 @@ Productions
          {-> a_bloco_array  } =
 
      { bloco_array } bloco_inicio_array array bloco_fim_array 
-         {-> New a_bloco_array (bloco_inicio_array.a_bloco_inicio_array , array.a_array , bloco_fim_array.a_bloco_fim_array  )  }  
+         {-> New a_bloco_array (bloco_inicio_array.a_bloco_inicio_array , [ array.a_exp ], bloco_fim_array.a_bloco_fim_array  )  }  
      ;
 
  bloco_inicio
@@ -275,31 +275,23 @@ Productions
      ;
 
  parametros
-         {-> a_parametros } =
+         {-> a_exp* } =
          
-     {parametros} exp_numerica parametos_tail* 
-         {-> New a_parametros ([ exp_numerica.a_exp , parametos_tail.a_exp ] )  }  
-     ;
+     {single} exp_numerica
+         {-> [ exp_numerica.a_exp ]  }  |
 
- parametos_tail
-         {-> a_exp } =
-
-      tk_virgula exp_numerica 
-         {-> exp_numerica.a_exp }  
+     {multiple} exp_numerica tk_virgula parametros 
+         {-> [ exp_numerica.a_exp, parametros.a_exp ]  }  
      ;
 
  array
-         {-> a_array } =
+         {-> a_exp* } =
          
-     {array} exp array_tail* 
-         {-> New a_array ( [exp.a_exp, array_tail.a_exp ] )  }  
-     ;
+     {single} exp 
+         {->  [ exp.a_exp ]  }   |
 
- array_tail
-         {-> a_exp  } =
-
-     tk_virgula exp 
-         {-> exp.a_exp }  
+     {multiple} exp tk_virgula array 
+     	 {->  [ exp.a_exp, array.a_exp ]  }   
      ;
 
  exp
@@ -424,7 +416,7 @@ Productions
          {-> New a_exp.a_funcao_alfabetogrego ( funcao_alfabetogrego.a_funcao_alfabetogrego ) }   |
 
      {lf_operador_custom} tk_lf_operatorname tk_chave_left tk_identificador tk_chave_right tk_par_left parametros tk_par_right 
-         {-> New a_exp.a_lf_operador_custom (tk_identificador, parametros.a_parametros )  }   |
+         {-> New a_exp.a_lf_operador_custom (tk_identificador,  [parametros.a_exp]  )  }   |
 
      {lf_style} tk_lf_displaystyle tk_identificador 
          {-> New a_exp.a_lf_style (tk_lf_displaystyle , tk_identificador  )  }  
@@ -516,14 +508,14 @@ Productions
          {-> a_exp  } =
 
      tk_min tk_par_left parametros tk_par_right 
-         {-> New a_exp.a_fm_min ( tk_min, tk_par_left, parametros.a_parametros, tk_par_right )  }  
+         {-> New a_exp.a_fm_min ( tk_min, tk_par_left,  [parametros.a_exp] , tk_par_right )  }  
      ;
 
  fm_max
          {-> a_exp  } =
 
      tk_max tk_par_left parametros tk_par_right 
-         {-> New a_exp.a_fm_max ( tk_max, tk_par_left, parametros.a_parametros, tk_par_right  )  }  
+         {-> New a_exp.a_fm_max ( tk_max, tk_par_left,  [parametros.a_exp] , tk_par_right  )  }  
      ;
 
  fm_frac
@@ -768,7 +760,7 @@ Abstract Syntax Tree
      ;
 
 	a_bloco_array =
-	 a_bloco_inicio_array a_array a_bloco_fim_array
+	 a_bloco_inicio_array a_exp* a_bloco_fim_array
 	 ;
 	
 	a_bloco_inicio =   
@@ -782,14 +774,6 @@ Abstract Syntax Tree
 	
 	a_bloco_fim_array =  
 	 ;
-
-	a_array =
-	 a_exp*
-	 ;
-	 
-	a_parametros = 
-	 a_exp* 
-     ;
 	 
     a_exp =
      {a_exp_numerica} a_exp | 
@@ -814,7 +798,7 @@ Abstract Syntax Tree
      {a_identificador} tk_identificador | 
      {a_funcao_alfabetogrego} a_funcao_alfabetogrego | 
      {a_equacao_trig} a_funcao_trigonometrica a_equacao_trig_expo? a_exp | 
-     {a_lf_operador_custom} tk_identificador a_parametros | 
+     {a_lf_operador_custom} tk_identificador a_exp* | 
      {a_lf_style} tk_lf_displaystyle tk_identificador |
  	 {a_fa_times} [left]:a_exp [right]:a_exp |
  	 {a_fa_cdot} [left]:a_exp [right]:a_exp |
@@ -822,13 +806,15 @@ Abstract Syntax Tree
  	 {a_fa_prod} [left]:a_exp [right]:a_exp |
      {a_vec_id} tk_vec tk_identificador | 
      {a_vec_chave} tk_vec a_exp |
-     {a_fm_min} tk_min tk_par_left a_parametros tk_par_right  | 
-     {a_fm_max} tk_max tk_par_left a_parametros tk_par_right  | 
+     {a_fm_min} tk_min tk_par_left a_exp* tk_par_right  | 
+     {a_fm_max} tk_max tk_par_left a_exp* tk_par_right  | 
      {a_fm_frac} tk_frac [left]: a_exp [right]: a_exp  | 
      {a_fm_exp} tk_exp a_exp  | 
      {a_fm_sqrt} tk_sqrt a_exp  | 
      {a_fm_lim} tk_lim tk_underline tk_chave_left tk_identificador tk_to tk_infty tk_chave_right  | 
-     {a_fm_integral} tk_integral tk_underline [left]: a_exp tk_pot [right]: a_exp  
+     {a_fm_integral} tk_integral tk_underline [left]: a_exp tk_pot [right]: a_exp  |
+     {a_array} a_exp*  |
+     {a_parametros} a_exp* 
      ;
 
     a_funcao_trigonometrica =
