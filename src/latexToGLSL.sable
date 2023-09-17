@@ -177,7 +177,7 @@ Tokens
 
 
  tk_num_inteiro = (digito+);
- tk_num_real = (digito+ ',' digito+);
+ tk_num_real = (digito+ '.' digito+);
  tk_identificador = (letra+); 
 
 
@@ -290,6 +290,9 @@ Productions
 
      {numero} numero 
          {-> numero.a_exp  }   |
+         
+     {vetor_tres} vetor_tres 
+         {-> vetor_tres.a_exp  }   |
 
      {fl_parenteses} fl_parenteses 
          {-> fl_parenteses.a_exp  }   |
@@ -302,6 +305,13 @@ Productions
 
      {negativo} tk_subt termo 
         { -> New a_exp.a_negativo ( termo.a_exp ) }  
+     ;
+
+ vetor_tres
+         {-> a_exp  } =
+
+     tk_par_left [x]:exp [a]:tk_virgula [y]:exp [b]:tk_virgula [z]:exp tk_par_right 
+         {-> New a_exp.a_vetor_tres ( x.a_exp, y.a_exp, z.a_exp )  }   
      ;
 
  numero
@@ -399,11 +409,11 @@ Productions
  fa_vec
          {-> a_exp  } =
 
-     {vetora} tk_vec tk_identificador 
-         {-> New a_exp.a_vetora ( tk_identificador  )  }   |
+     {vetor_id_fa} tk_vec tk_identificador 
+         {-> New a_exp.a_vetor_id_fa ( tk_identificador  )  }   |
 
-     {vetorb} tk_vec fl_chaves 
-         {-> New a_exp.a_vetorb ( fl_chaves.a_exp )  }  
+     {vetor_fa} tk_vec fl_chaves 
+         {-> New a_exp.a_vetor_fa ( fl_chaves.a_exp )  }  
      ;
 
  fl_matematica
@@ -739,6 +749,7 @@ Abstract Syntax Tree
      {a_negativo} a_exp |
      {a_tk_num_inteiro} tk_num_inteiro | 
      {a_tk_num_real} tk_num_real |
+     {a_vetor_tres} [x]:a_exp [y]:a_exp [z]:a_exp  |
      {a_id_modificado} [left]:a_exp [right]:a_exp |
      {a_identificador} tk_identificador | 
      {a_equacao_trig} a_fl_trigonometrica a_equacao_trig_pot? a_exp | 
@@ -748,8 +759,8 @@ Abstract Syntax Tree
  	 {a_fa_cdot} [left]:a_exp [right]:a_exp |
  	 {a_fa_sum} [left]:a_exp [right]:a_exp |
  	 {a_fa_prod} [left]:a_exp [right]:a_exp |
-     {a_vetora} tk_identificador | 
-     {a_vetorb} a_exp |
+     {a_vetor_id_fa} tk_identificador | 
+     {a_vetor_fa} a_exp |
      {a_fm_min} a_exp* | 
      {a_fm_max} a_exp* | 
      {a_fm_frac} [left]: a_exp [right]: a_exp  | 
