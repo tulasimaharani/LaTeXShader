@@ -9,6 +9,59 @@ Package latexToGLSL;
 Helpers
 
 
+/* Alfabeto Grego */
+ 
+ 
+ alfabeto_grego = 
+ '\alpha'     | 
+ '\beta'      | 
+ '\gamma'     | 
+ '\Gamma'     | 
+ '\delta'     | 
+ '\Delta'     | 
+ '\epsilon'   | 
+ '\varepsilon'| 
+ '\zeta'      | 
+ '\eta'       | 
+ '\theta'     | 
+ '\Theta'     | 
+ '\vartheta'  | 
+ '\iota'      |  
+ '\kappa'     | 
+ '\varkappa'  |
+ '\lambda'    | 
+ '\Lambda'    | 
+ '\mu'        | 
+ '\nu'        | 
+ '\xi'        | 
+ '\Xi'        | 
+ '\pi'        | 
+ '\Pi'        | 
+ '\varpi'     | 
+ '\rho'       | 
+ '\varrho'    | 
+ '\sigma'     | 
+ '\Sigma'     | 
+ '\varsigma'  |
+ '\tau'       | 
+ '\upsilon'   |
+ '\Upsilon'	  |
+ '\phi'       | 
+ '\Phi'       | 
+ '\varphi'    |
+ '\chi'       | 
+ '\psi'       | 
+ '\Psi'       |
+ '\omega' 	  | 
+ '\Omega'	  ;
+
+
+/* Expressoes Numéricas */
+
+
+ exponencial = '\exp'; //constante de euler
+
+
 /* Caracteres */
 
 
@@ -28,6 +81,7 @@ Helpers
  tudo_sem_chave = [tudo - '}'];
  tudo_sem_aspas = [tudo - '''];
  fl_espaco = '\\';
+ 
 
 /*************************************************************************/
 
@@ -75,7 +129,7 @@ Tokens
  tk_menorigual = '<=';
  
  
-/* Fun��es Algebra Linear */ 
+/* Funções Algebra Linear */ 
  
  
  tk_times = '\times'; /*cross product*/ 
@@ -85,13 +139,12 @@ Tokens
  tk_prod = '\prod';
  
  
-/* Fun��es Matem�ticas */ 
+/* Funções Matemáticas */ 
  
  
  tk_min = '\min';
  tk_max = '\max';
  tk_frac = '\frac';
- tk_exp = '\exp';
  tk_log = '\log';
  tk_ln = '\ln';
  tk_lg = '\lg';
@@ -109,7 +162,7 @@ Tokens
  tk_double_pipe = '\|';
  
  
-/* Fun��es Trigonom�tricas */ 
+/* Funções Trigonométricas */ 
 	
  tk_cos = '\cos';
  tk_sin = '\sin';
@@ -126,59 +179,12 @@ Tokens
  tk_sec = '\sec';
  tk_csc = '\csc';
  
- 
-/* Alfabeto Grego */
- 
- 
- tk_alpha = '\alpha';
- tk_beta = '\beta';
- tk_gamma = '\gamma';
- tk_up_gamma = '\Gamma';
- tk_delta = '\delta';
- tk_up_delta = '\Delta';
- tk_epsilon = '\epsilon';
- tk_varepsilon = '\varepsilon';
- tk_zeta = '\zeta';
- tk_eta = '\eta';
- tk_theta = '\theta';
- tk_up_theta = '\Theta';
- tk_vartheta = '\vartheta';
- tk_iota = '\iota';
- tk_kappa = '\kappa'; 
- tk_varkappa = '\varkappa';
- tk_lambda = '\lambda';
- tk_up_lambda = '\Lambda';
- tk_mu = '\mu';
- tk_nu = '\nu';
- tk_xi = '\xi';
- tk_up_xi = '\Xi';
- tk_pi = '\pi';
- tk_up_pi = '\Pi';
- tk_varpi = '\varpi';
- tk_rho = '\rho';
- tk_varrho = '\varrho';
- tk_sigma = '\sigma';
- tk_up_sigma = '\Sigma';
- tk_varsigma = '\varsigma';
- tk_tau = '\tau';
- tk_upsilon = '\upsilon';
- tk_up_upsilon = '\Upsilon';
- tk_phi = '\phi';
- tk_up_phi = '\Phi';
- tk_varphi = '\varphi';
- tk_chi = '\chi';
- tk_psi = '\psi';
- tk_up_psi = '\Psi';
- tk_omega = '\omega';
- tk_up_omega = '\Omega';
- 
- 
+
 /* Caracteres */
 
 
- tk_num_inteiro = (digito+);
- tk_num_real = (digito+ '.' digito+);
- tk_identificador = (letra+); 
+ tk_numero = (digito+) | (digito+ '.' digito+) | exponencial;
+ tk_identificador = (letra+) | alfabeto_grego; 
 
 
 /* Ignorados */
@@ -266,7 +272,7 @@ Productions
          {-> New a_exp.a_mult ( fator.a_exp, fator_expo.a_exp )  }   |
 
      {div} fator tk_div fator_expo 
-         {-> New a_exp.a_div ( fator.a_exp, fator_expo.a_exp )  }   |
+         {-> New a_exp.a_div ( fator.a_exp, fator_expo.a_exp )  }    |
 
      {mod} fator tk_mod fator_expo 
          {-> New a_exp.a_mod ( fator.a_exp, fator_expo.a_exp )  }  
@@ -285,23 +291,26 @@ Productions
  termo
          {-> a_exp  } =
 
-     {valor} valor 
-         {-> valor.a_exp  }   |
-
-     {numero} numero 
-         {-> numero.a_exp  }   |
+     {identificador} identificador 
+         {-> identificador.a_exp  }   |
+     
+	 {numero} tk_numero 
+         {-> New a_exp.a_numero ( tk_numero )  }   |
+             
+     {fl_reservado} fl_reservado 
+         {-> fl_reservado.a_exp }     |
          
      {vetor_tres} vetor_tres 
-         {-> vetor_tres.a_exp  }   |
+         {-> vetor_tres.a_exp  }      |
 
      {fl_parenteses} fl_parenteses 
          {-> fl_parenteses.a_exp  }   |
 
      {fl_colchetes} fl_colchetes 
-         {-> fl_colchetes.a_exp  }   |
+         {-> fl_colchetes.a_exp  }    |
 
      {fl_chaves} fl_chaves 
-         {-> fl_chaves.a_exp  }   |
+         {-> fl_chaves.a_exp  }       |
 
      {negativo} tk_subt termo 
         { -> New a_exp.a_negativo ( termo.a_exp ) }  
@@ -311,46 +320,30 @@ Productions
          {-> a_exp  } =
 
      tk_par_left [x]:exp [a]:tk_virgula [y]:exp [b]:tk_virgula [z]:exp tk_par_right 
-         {-> New a_exp.a_vetor_tres ( x.a_exp, y.a_exp, z.a_exp )  }   
+         {-> New a_exp.a_vetor_tridimensional ( x.a_exp, y.a_exp, z.a_exp )  }   
      ;
 
- numero
+ identificador
          {-> a_exp  } =
 
-     {tk_num_inteiro} tk_num_inteiro 
-         {-> New a_exp.a_tk_num_inteiro ( tk_num_inteiro  )  }   |
+     {id} tk_identificador 
+         {-> New a_exp.a_id ( tk_identificador  )  }   |
 
-     {tk_num_real} tk_num_real 
-         {-> New a_exp.a_tk_num_real ( tk_num_real  )  }  
-     ;
-
- valor
-         {-> a_exp  } =
-
-	 {fl_reservado} fl_reservado 
-         {-> fl_reservado.a_exp }   |
-	 
-     {identificador} tk_identificador 
-         {-> New a_exp.a_identificador ( tk_identificador  )  }   |
-
-     {id_modificado} valor tk_underline fl_chaves 
-         {-> New a_exp.a_id_modificado ( valor.a_exp , fl_chaves.a_exp  )  }  
+     {id_modificado} identificador tk_underline fl_chaves 
+         {-> New a_exp.a_id_modificado ( identificador.a_exp , fl_chaves.a_exp  )  }  
      ;
 
  fl_reservado
          {-> a_exp  } =
 
      {fl_algebra} fl_algebra 
-         {-> fl_algebra.a_exp }   |
+         {-> fl_algebra.a_exp }      |
 
      {fl_matematica} fl_matematica 
          {-> fl_matematica.a_exp }   |
 
      {equacao_trig} equacao_trig 
-         {-> equacao_trig.a_exp }   |
-
-     {fl_alfabetogrego} fl_alfabetogrego 
-         {-> fl_alfabetogrego.a_exp }   |
+         {-> equacao_trig.a_exp }    |
 
      {fl_operador_custom} tk_fl_operatorname tk_chave_left tk_identificador tk_chave_right tk_par_left parametros tk_par_right 
          {-> New a_exp.a_fl_operador_custom (tk_identificador,  [parametros.a_exp]  )  }   |
@@ -366,13 +359,13 @@ Productions
          {-> fa_times.a_exp }   |
 
      {cdot} fa_cdot 
-         {-> fa_cdot.a_exp }   |
+         {-> fa_cdot.a_exp }    |
 
      {sum} fa_sum 
-         {-> fa_sum.a_exp }   |
+         {-> fa_sum.a_exp }     |
 
      {prod} fa_prod 
-         {-> fa_prod.a_exp }   |
+         {-> fa_prod.a_exp }    |
 
      {vec} fa_vec 
          {-> fa_vec.a_exp }   
@@ -381,29 +374,29 @@ Productions
  fa_times
          {-> a_exp  } =
 
-     [left]: fl_chaves tk_times [right]: fl_chaves 
-         {-> New a_exp.a_fa_times ( left.a_exp , right.a_exp )  }  
+     [lado_esquerdo]: fl_chaves tk_times [lado_direito]: fl_chaves 
+         {-> New a_exp.a_fa_times ( lado_esquerdo.a_exp , lado_direito.a_exp )  }  
      ;
 
  fa_cdot
          {-> a_exp  } =
 
-     [left]: fl_chaves tk_cdot [right]: fl_chaves 
-         {-> New a_exp.a_fa_cdot ( left.a_exp , right.a_exp )  }  
+     [lado_esquerdo]: fl_chaves tk_cdot [lado_direito]: fl_chaves 
+         {-> New a_exp.a_fa_cdot ( lado_esquerdo.a_exp , lado_direito.a_exp )  }  
      ;
 
  fa_sum
          {-> a_exp  } =
 
-     tk_sum tk_underline [left]: fl_chaves tk_pot [right]: fl_chaves 
-         {-> New a_exp.a_fa_sum ( left.a_exp , right.a_exp ) }  
+     tk_sum tk_underline [lado_esquerdo]: fl_chaves tk_pot [lado_direito]: fl_chaves 
+         {-> New a_exp.a_fa_sum ( lado_esquerdo.a_exp , lado_direito.a_exp ) }  
      ;
 
  fa_prod
          {-> a_exp  } =
 
-     tk_prod tk_underline [left]: fl_chaves tk_pot [right]: fl_chaves 
-         {-> New a_exp.a_fa_prod ( left.a_exp , right.a_exp )  }  
+     tk_prod tk_underline [lado_esquerdo]: fl_chaves tk_pot [lado_direito]: fl_chaves 
+         {-> New a_exp.a_fa_prod ( lado_esquerdo.a_exp , lado_direito.a_exp )  }  
      ;
 
  fa_vec
@@ -420,22 +413,19 @@ Productions
          {-> a_exp  } =
 
      {fm_min} fm_min 
-         {-> fm_min.a_exp }   |
+         {-> fm_min.a_exp }    |
 
      {fm_max} fm_max 
-         {-> fm_max.a_exp }   |
+         {-> fm_max.a_exp }    |
 
      {fm_frac} fm_frac 
          {-> fm_frac.a_exp }   |
-
-     {fm_exponencial} fm_exponencial 
-         {-> fm_exponencial.a_exp }   |
 
      {fm_sqrt} fm_sqrt 
          {-> fm_sqrt.a_exp }   |
 
      {fm_lim} fm_lim 
-         {-> fm_lim.a_exp }   |
+         {-> fm_lim.a_exp }    |
 
      {fm_integral} fm_integral 
          {-> fm_integral.a_exp } 
@@ -458,8 +448,8 @@ Productions
  fm_frac
          {-> a_exp  } =
 
-     tk_frac [left]: fl_chaves [right]: fl_chaves 
-         {-> New a_exp.a_fm_frac ( left.a_exp , right.a_exp )  }  
+     tk_frac [numerador]: fl_chaves [denominador]: fl_chaves 
+         {-> New a_exp.a_fm_frac ( numerador.a_exp , denominador.a_exp )  }  
      ;
 
  fm_sqrt
@@ -479,61 +469,54 @@ Productions
  fm_integral
          {-> a_exp  } =
 
-     tk_integral tk_underline [left]: fl_chaves tk_pot [right]: fl_chaves 
-         {-> New a_exp.a_fm_integral ( left.a_exp , right.a_exp  )  }  
-     ;
-
- fm_exponencial
-         {-> a_exp  } =
-
-     tk_exp fl_colchetes 
-         {-> New a_exp.a_fm_exponencial ( fl_colchetes.a_exp )  }  
+     tk_integral tk_underline [lado_esquerdo]: fl_chaves tk_pot [lado_direito]: fl_chaves 
+         {-> New a_exp.a_fm_integral ( lado_esquerdo.a_exp , lado_direito.a_exp  )  }  
      ;
 
  fl_trigonometrica
          {-> a_fl_trigonometrica  } =
 
-     {tk_cos} tk_cos 
-         {-> New a_fl_trigonometrica.tk_cos ( tk_cos  )  }   |
+     {a_cos} tk_cos 
+         {-> New a_fl_trigonometrica.a_cos ( tk_cos  )  }   |
 
-     {tk_sin} tk_sin 
-         {-> New a_fl_trigonometrica.tk_sin ( tk_sin  )  }   |
+     {a_sin} tk_sin 
+         {-> New a_fl_trigonometrica.a_sin ( tk_sin  )  }   |
 
-     {tk_tan} tk_tan 
-         {-> New a_fl_trigonometrica.tk_tan ( tk_tan  )  }   |
+     {a_tan} tk_tan 
+         {-> New a_fl_trigonometrica.a_tan ( tk_tan  )  }   |
 
-     {tk_cot} tk_cot 
-         {-> New a_fl_trigonometrica.tk_cot ( tk_cot  )  }   |
+     {a_cot} tk_cot 
+         {-> New a_fl_trigonometrica.a_cot ( tk_cot  )  }   |
 
-     {tk_arcsin} tk_arcsin 
-         {-> New a_fl_trigonometrica.tk_arcsin ( tk_arcsin  )  }   |
+     {a_arcsin} tk_arcsin 
+         {-> New a_fl_trigonometrica.a_arcsin ( tk_arcsin  )  }   |
 
-     {tk_arccos} tk_arccos 
-         {-> New a_fl_trigonometrica.tk_arccos ( tk_arccos  )  }   |
+     {a_arccos} tk_arccos 
+         {-> New a_fl_trigonometrica.a_arccos ( tk_arccos  )  }   |
 
-     {tk_arctan} tk_arctan 
-         {-> New a_fl_trigonometrica.tk_arctan ( tk_arctan  )  }   |
+     {a_arctan} tk_arctan 
+         {-> New a_fl_trigonometrica.a_arctan ( tk_arctan  )  }   |
 
-     {tk_arccot} tk_arccot 
-         {-> New a_fl_trigonometrica.tk_arccot ( tk_arccot  )  }   |
+     {a_arccot} tk_arccot 
+         {-> New a_fl_trigonometrica.a_arccot ( tk_arccot  )  }   |
 
-     {tk_sinh} tk_sinh 
-         {-> New a_fl_trigonometrica.tk_sinh ( tk_sinh  )  }   |
+     {a_sinh} tk_sinh 
+         {-> New a_fl_trigonometrica.a_sinh ( tk_sinh  )  }   |
 
-     {tk_cosh} tk_cosh 
-         {-> New a_fl_trigonometrica.tk_cosh ( tk_cosh  )  }   |
+     {a_cosh} tk_cosh 
+         {-> New a_fl_trigonometrica.a_cosh ( tk_cosh  )  }   |
 
-     {tk_tanh} tk_tanh 
-         {-> New a_fl_trigonometrica.tk_tanh ( tk_tanh  )  }   |
+     {a_tanh} tk_tanh 
+         {-> New a_fl_trigonometrica.a_tanh ( tk_tanh  )  }   |
 
-     {tk_coth} tk_coth 
-         {-> New a_fl_trigonometrica.tk_coth ( tk_coth  )  }   |
+     {a_coth} tk_coth 
+         {-> New a_fl_trigonometrica.a_coth ( tk_coth  )  }   |
 
-     {tk_sec} tk_sec 
-         {-> New a_fl_trigonometrica.tk_sec ( tk_sec  )  }   |
+     {a_sec} tk_sec 
+         {-> New a_fl_trigonometrica.a_sec ( tk_sec  )  }   |
 
-     {tk_csc} tk_csc 
-         {-> New a_fl_trigonometrica.tk_csc ( tk_csc  )  }  
+     {a_csc} tk_csc 
+         {-> New a_fl_trigonometrica.a_csc ( tk_csc  )  }  
      ;
 
  equacao_trig
@@ -548,133 +531,6 @@ Productions
 
      tk_pot fl_chaves 
          {-> New a_equacao_trig_pot ( fl_chaves.a_exp )  }  
-     ;
-
- fl_alfabetogrego
-         {-> a_exp  } =
-
-     {tk_alpha} tk_alpha 
-         {-> New a_exp.tk_alpha (tk_alpha  )  }   |
-
-     {tk_beta} tk_beta 
-         {-> New a_exp.tk_beta (tk_beta  )  }   |
-
-     {tk_gamma} tk_gamma 
-         {-> New a_exp.tk_gamma (tk_gamma  )  }   |
-
-     {tk_up_gamma} tk_up_gamma 
-         {-> New a_exp.tk_up_gamma (tk_up_gamma  )  }   |
-
-     {tk_delta} tk_delta 
-         {-> New a_exp.tk_delta (tk_delta  )  }   |
-
-     {tk_up_delta} tk_up_delta 
-         {-> New a_exp.tk_up_delta (tk_up_delta  )  }   |
-
-     {tk_epsilon} tk_epsilon 
-         {-> New a_exp.tk_epsilon (tk_epsilon  )  }   |
-
-     {tk_varepsilon} tk_varepsilon 
-         {-> New a_exp.tk_varepsilon (tk_varepsilon  )  }   |
-
-     {tk_zeta} tk_zeta 
-         {-> New a_exp.tk_zeta (tk_zeta  )  }   |
-
-     {tk_eta} tk_eta 
-         {-> New a_exp.tk_eta (tk_eta  )  }   |
-
-     {tk_theta} tk_theta 
-         {-> New a_exp.tk_theta (tk_theta  )  }   |
-
-     {tk_up_theta} tk_up_theta 
-         {-> New a_exp.tk_up_theta (tk_up_theta  )  }   |
-
-     {tk_vartheta} tk_vartheta 
-         {-> New a_exp.tk_vartheta (tk_vartheta  )  }   |
-
-     {tk_iota} tk_iota 
-         {-> New a_exp.tk_iota (tk_iota  )  }   |
-
-     {tk_kappa} tk_kappa 
-         {-> New a_exp.tk_kappa (tk_kappa  )  }   |
-
-     {tk_varkappa} tk_varkappa 
-         {-> New a_exp.tk_varkappa (tk_varkappa  )  }   |
-
-     {tk_lambda} tk_lambda 
-         {-> New a_exp.tk_lambda (tk_lambda  )  }   |
-
-     {tk_up_lambda} tk_up_lambda 
-         {-> New a_exp.tk_up_lambda (tk_up_lambda  )  }   |
-
-     {tk_mu} tk_mu 
-         {-> New a_exp.tk_mu (tk_mu  )  }   |
-
-     {tk_nu} tk_nu 
-         {-> New a_exp.tk_nu (tk_nu  )  }   |
-
-     {tk_xi} tk_xi 
-         {-> New a_exp.tk_xi (tk_xi  )  }   |
-
-     {tk_up_xi} tk_up_xi 
-         {-> New a_exp.tk_up_xi (tk_up_xi  )  }   |
-
-     {tk_pi} tk_pi 
-         {-> New a_exp.tk_pi (tk_pi  )  }   |
-
-     {tk_up_pi} tk_up_pi 
-         {-> New a_exp.tk_up_pi (tk_up_pi  )  }   |
-
-     {tk_varpi} tk_varpi 
-         {-> New a_exp.tk_varpi (tk_varpi  )  }   |
-
-     {tk_rho} tk_rho 
-         {-> New a_exp.tk_rho (tk_rho  )  }   |
-
-     {tk_varrho} tk_varrho 
-         {-> New a_exp.tk_varrho (tk_varrho  )  }   |
-
-     {tk_sigma} tk_sigma 
-         {-> New a_exp.tk_sigma (tk_sigma  )  }   |
-
-     {tk_up_sigma} tk_up_sigma 
-         {-> New a_exp.tk_up_sigma (tk_up_sigma  )  }   |
-
-     {tk_varsigma} tk_varsigma 
-         {-> New a_exp.tk_varsigma (tk_varsigma  )  }   |
-
-     {tk_tau} tk_tau 
-         {-> New a_exp.tk_tau (tk_tau  )  }   |
-
-     {tk_upsilon} tk_upsilon 
-         {-> New a_exp.tk_upsilon (tk_upsilon  )  }   |
-
-     {tk_up_upsilon} tk_up_upsilon 
-         {-> New a_exp.tk_up_upsilon (tk_up_upsilon  )  }   |
-
-     {tk_phi} tk_phi 
-         {-> New a_exp.tk_phi (tk_phi  )  }   |
-
-     {tk_up_phi} tk_up_phi 
-         {-> New a_exp.tk_up_phi (tk_up_phi  )  }   |
-
-     {tk_varphi} tk_varphi 
-         {-> New a_exp.tk_varphi (tk_varphi  )  }   |
-
-     {tk_chi} tk_chi 
-         {-> New a_exp.tk_chi (tk_chi  )  }   |
-
-     {tk_psi} tk_psi 
-         {-> New a_exp.tk_psi (tk_psi  )  }   |
-
-     {tk_up_psi} tk_up_psi 
-         {-> New a_exp.tk_up_psi (tk_up_psi  )  }   |
-
-     {tk_omega} tk_omega 
-         {-> New a_exp.tk_omega (tk_omega  )  }   |
-
-     {tk_up_omega} tk_up_omega 
-         {-> New a_exp.tk_up_omega (tk_up_omega  )  }  
      ;
 
  bloco_inicio  =
@@ -727,108 +583,68 @@ Abstract Syntax Tree
 
 /*************************************************************************/
 
+
     a_bloco_equacoes =
-     {a_equacao} a_equacao |
+     {a_equacao} a_equacao 			|
      {a_lista_equacoes} a_equacao* 
      ;
      
     a_equacao = 
 	 tk_identificador a_exp 
 	 ;
-	
-    a_exp =
-	 {a_soma} [left]:a_exp [right]:a_exp |
- 	 {a_dim} [left]:a_exp [right]:a_exp |
- 	 {a_div} [left]:a_exp [right]:a_exp |
- 	 {a_mult} [left]:a_exp [right]:a_exp |
-  	 {a_mod} [left]:a_exp [right]:a_exp |
-     {a_pot} [left]:a_exp [right]:a_exp |
-     {a_fl_colchetes} a_exp  |
-     {a_fl_parenteses} a_exp |
-     {a_fl_chaves} a_exp |
-     {a_negativo} a_exp |
-     {a_tk_num_inteiro} tk_num_inteiro | 
-     {a_tk_num_real} tk_num_real |
-     {a_vetor_tres} [x]:a_exp [y]:a_exp [z]:a_exp  |
-     {a_id_modificado} [left]:a_exp [right]:a_exp |
-     {a_identificador} tk_identificador | 
-     {a_equacao_trig} a_fl_trigonometrica a_equacao_trig_pot? a_exp | 
-     {a_fl_operador_custom} tk_identificador a_exp* | 
-     {a_fl_style} tk_fl_displaystyle tk_identificador |
- 	 {a_fa_times} [left]:a_exp [right]:a_exp |
- 	 {a_fa_cdot} [left]:a_exp [right]:a_exp |
- 	 {a_fa_sum} [left]:a_exp [right]:a_exp |
- 	 {a_fa_prod} [left]:a_exp [right]:a_exp |
-     {a_vetor_id_fa} tk_identificador | 
-     {a_vetor_fa} a_exp |
-     {a_fm_min} a_exp* | 
-     {a_fm_max} a_exp* | 
-     {a_fm_frac} [left]: a_exp [right]: a_exp  | 
-     {a_fm_exponencial} a_exp  | 
-     {a_fm_sqrt} a_exp  | 
-     {a_fm_lim} tk_lim tk_underline tk_chave_left tk_identificador tk_to tk_infty tk_chave_right  | 
-     {a_fm_integral} [left]: a_exp [right]: a_exp  |
-     {a_parametros} a_exp* |
-     {tk_alpha} tk_alpha | 
-     {tk_beta} tk_beta | 
-     {tk_gamma} tk_gamma | 
-     {tk_up_gamma} tk_up_gamma | 
-     {tk_delta} tk_delta | 
-     {tk_up_delta} tk_up_delta | 
-     {tk_epsilon} tk_epsilon | 
-     {tk_varepsilon} tk_varepsilon | 
-     {tk_zeta} tk_zeta | 
-     {tk_eta} tk_eta | 
-     {tk_theta} tk_theta | 
-     {tk_up_theta} tk_up_theta | 
-     {tk_vartheta} tk_vartheta | 
-     {tk_iota} tk_iota | 
-     {tk_kappa} tk_kappa | 
-     {tk_varkappa} tk_varkappa | 
-     {tk_lambda} tk_lambda | 
-     {tk_up_lambda} tk_up_lambda | 
-     {tk_mu} tk_mu | 
-     {tk_nu} tk_nu | 
-     {tk_xi} tk_xi | 
-     {tk_up_xi} tk_up_xi | 
-     {tk_pi} tk_pi | 
-     {tk_up_pi} tk_up_pi | 
-     {tk_varpi} tk_varpi | 
-     {tk_rho} tk_rho | 
-     {tk_varrho} tk_varrho | 
-     {tk_sigma} tk_sigma | 
-     {tk_up_sigma} tk_up_sigma | 
-     {tk_varsigma} tk_varsigma | 
-     {tk_tau} tk_tau | 
-     {tk_upsilon} tk_upsilon | 
-     {tk_up_upsilon} tk_up_upsilon | 
-     {tk_phi} tk_phi | 
-     {tk_up_phi} tk_up_phi | 
-     {tk_varphi} tk_varphi | 
-     {tk_chi} tk_chi | 
-     {tk_psi} tk_psi | 
-     {tk_up_psi} tk_up_psi | 
-     {tk_omega} tk_omega | 
-     {tk_up_omega} tk_up_omega 
-     ;
-     
-    a_fl_trigonometrica =
-     {tk_cos} tk_cos | 
-     {tk_sin} tk_sin | 
-     {tk_tan} tk_tan | 
-     {tk_cot} tk_cot | 
-     {tk_arcsin} tk_arcsin | 
-     {tk_arccos} tk_arccos | 
-     {tk_arctan} tk_arctan | 
-     {tk_arccot} tk_arccot | 
-     {tk_sinh} tk_sinh | 
-     {tk_cosh} tk_cosh | 
-     {tk_tanh} tk_tanh | 
-     {tk_coth} tk_coth | 
-     {tk_sec} tk_sec | 
-     {tk_csc} tk_csc 
-     ;
-
-    a_equacao_trig_pot =
+	 
+	a_equacao_trig_pot =
       a_exp 
      ;
+     
+	a_fl_trigonometrica =
+     {a_cos}		tk_cos		| 
+     {a_sin} 		tk_sin 		| 
+     {a_tan} 		tk_tan 		| 
+     {a_cot} 		tk_cot 		| 
+     {a_arcsin} 	tk_arcsin 	| 
+     {a_arccos} 	tk_arccos 	| 
+     {a_arctan} 	tk_arctan 	| 
+     {a_arccot} 	tk_arccot 	| 
+     {a_sinh}		tk_sinh 	| 
+     {a_cosh}		tk_cosh 	| 
+     {a_tanh}		tk_tanh 	| 
+     {a_coth} 		tk_coth 	| 
+     {a_sec} 		tk_sec 		| 
+     {a_csc}		tk_csc 
+     ;
+
+    a_exp =
+	 {a_soma}                 [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
+ 	 {a_dim}                  [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
+ 	 {a_mult}                 [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
+  	 {a_mod}                  [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
+     {a_div}                  [numerador]:a_exp [denominador]:a_exp         |
+     {a_pot}                  [base]:a_exp [expoente]:a_exp                 |
+     {a_numero}               tk_numero 									|
+     {a_parametros}           a_exp*                                        |
+     {a_fl_colchetes}         a_exp                                         |
+     {a_fl_parenteses}        a_exp                                         |
+     {a_fl_chaves}            a_exp                                         |
+     {a_negativo}             a_exp                                         | 
+     {a_vetor_fa}             a_exp                                         |
+     {a_vetor_id_fa}          tk_identificador                              |
+     {a_id}                   tk_identificador                              |
+     {a_id_modificado}        [id]:a_exp [modificador]:a_exp                |
+     {a_vetor_tridimensional} [x]:a_exp [y]:a_exp [z]:a_exp                 |
+     {a_equacao_trig}         a_fl_trigonometrica a_equacao_trig_pot? a_exp | 
+     {a_fl_operador_custom}   tk_identificador a_exp*                       | 
+     {a_fl_style}             tk_fl_displaystyle tk_identificador           |
+ 	 {a_fa_times}             [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
+ 	 {a_fa_cdot}              [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
+ 	 {a_fa_sum}               [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
+ 	 {a_fa_prod}              [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
+     {a_fm_min}               a_exp*                                        | 
+     {a_fm_max}               a_exp*                                        | 
+     {a_fm_sqrt}              a_exp                                         | 
+     {a_fm_frac}              [numerador]:a_exp [denominador]:a_exp         |  
+     {a_fm_integral}          [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
+     {a_fm_lim} 			  tk_lim tk_underline tk_chave_left tk_identificador tk_to tk_infty tk_chave_right 
+     ;
+     
+    
