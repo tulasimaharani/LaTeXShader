@@ -39,6 +39,22 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		this.currentEquation = currentEquation;
 	}
 
+	public Type verifyTypeOnTable(String nodeName) {
+		return symbolTable.get(nodeName);
+	}
+	
+	public Boolean isIdentificador(String nodeName) {
+		return symbolTable.get(nodeName).equals(Type.Identificador);
+	}
+	
+	public Boolean isNumero(String nodeName) {
+		return symbolTable.get(nodeName).equals(Type.Numero);
+	}
+	
+	public Boolean isVetor(String nodeName) {
+		return symbolTable.get(nodeName).equals(Type.Vetor);
+	}
+	
 	@Override
 	public void inStart(Start node) {
 		System.out.println("-------------------------------------------------");
@@ -102,20 +118,31 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		System.out.println("-------------------------------------------------");
 		System.out.println("O nó é " + node.getClass().getSimpleName());
 		
-		Type tipoRight = stack.pop();
-		Type tipoLeft = stack.pop();
+		Type tipoRightStack = stack.pop();
+		Type tipoLeftStack = stack.pop();
 
-		if (!(tipoLeft.equals(Type.Numero) && tipoRight.equals(Type.Numero)) &&
-			!(tipoLeft.equals(Type.Vetor) && tipoRight.equals(Type.Vetor))   &&
-		    !(tipoLeft.equals(Type.Identificador) && tipoRight.equals(Type.Identificador)) ) {
-			throw new RuntimeException("Uma soma deve ser entre dois numeros ou dois vetores");
-		} else {
-			System.out.println("-------------------------------------------------");
-			System.out.println(tipoLeft + " + " + tipoRight);
-			
-			symbolTable.replace(getCurrentEquation(), tipoLeft);
-			stack.add(tipoLeft);
+		Type tipoRightTable = symbolTable.get(node.getLadoDireito().toString());
+		Type tipoLeftTable = symbolTable.get(node.getLadoEsquerdo().toString());
+		
+		if (tipoRightStack.equals(Type.Identificador) && !tipoRightTable.equals(Type.Identificador)) {
+			tipoRightStack = tipoRightTable;
 		}
+		
+		if (tipoLeftStack.equals(Type.Identificador) && !tipoLeftTable.equals(Type.Identificador)) {
+			tipoLeftStack = tipoLeftTable;
+		}
+		
+		if (!(tipoLeftStack.equals(Type.Numero) && tipoRightStack.equals(Type.Numero)) ||
+			!(tipoLeftStack.equals(Type.Vetor) && tipoRightStack.equals(Type.Vetor))) {
+			throw new RuntimeException("Uma soma deve ser entre dois numeros ou dois vetores");
+		} 
+		
+		System.out.println("-------------------------------------------------");
+		System.out.println(tipoLeftStack + " + " + tipoRightStack);
+		
+		symbolTable.replace(getCurrentEquation(), tipoLeftStack);
+		stack.add(tipoLeftStack);
+		
 	}
 	
 	@Override
@@ -123,41 +150,99 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		System.out.println("-------------------------------------------------");
 		System.out.println("O nó é " + node.getClass().getSimpleName());
 		
-		Type tipoRight = stack.pop();
-		Type tipoLeft = stack.pop();
+		Type tipoRightStack = stack.pop();
+		Type tipoLeftStack = stack.pop();
 
-		if (!(tipoLeft.equals(Type.Numero) && tipoRight.equals(Type.Numero)) &&
-			!(tipoLeft.equals(Type.Vetor) && tipoRight.equals(Type.Vetor))   &&
-			!(tipoLeft.equals(Type.Identificador) && tipoRight.equals(Type.Identificador)) ) {
-			throw new RuntimeException("Uma diferença deve ser entre dois numeros");
-		} else {
-			System.out.println("-------------------------------------------------");
-			System.out.println(tipoLeft + " - " + tipoRight);
-			
-			symbolTable.replace(getCurrentEquation(), tipoLeft);
-			stack.add(tipoLeft);
+		Type tipoRightTable = symbolTable.get(node.getLadoDireito().toString());
+		Type tipoLeftTable = symbolTable.get(node.getLadoEsquerdo().toString());
+		
+		if (tipoRightStack.equals(Type.Identificador) && !tipoRightTable.equals(Type.Identificador)) {
+			tipoRightStack = tipoRightTable;
 		}
+		
+		if (tipoLeftStack.equals(Type.Identificador) && !tipoLeftTable.equals(Type.Identificador)) {
+			tipoLeftStack = tipoLeftTable;
+		}
+		
+		if (!(tipoLeftStack.equals(Type.Numero) && tipoRightStack.equals(Type.Numero)) ||
+			!(tipoLeftStack.equals(Type.Vetor) && tipoRightStack.equals(Type.Vetor))) {
+			throw new RuntimeException("Uma diferença deve ser entre dois numeros ou dois vetores");
+		} 
+		
+		System.out.println("-------------------------------------------------");
+		System.out.println(tipoLeftStack + " - " + tipoRightStack);
+		
+		symbolTable.replace(getCurrentEquation(), tipoLeftStack);
+		stack.add(tipoLeftStack);
 	}
 
 	@Override
 	public void outAADivAExp(AADivAExp node) {
+		// numerador / denominador
 		System.out.println("-------------------------------------------------");
 		System.out.println("O nó é " + node.getClass().getSimpleName());
 		
-		Type denominador = stack.pop();
-		Type numerador = stack.pop();
+		Type denominadorStack = stack.pop();
+		Type numeradorStack = stack.pop();
 
-		if (!(denominador.equals(Type.Numero) && numerador.equals(Type.Numero))) { 
-			//se os ids representarem numeros
-			//(!tipoLeft.equals(Type.Identificador) && !tipoRight.equals(Type.Identificador)) ) { 
-			throw new RuntimeException("Uma divisão deve ser entre dois numeros");
-		} else {
-			System.out.println("-------------------------------------------------");
-			System.out.println(numerador + " / " + denominador);
-			
-			symbolTable.replace(getCurrentEquation(), denominador);
-			stack.add(denominador);
+		Type denominadorTable = symbolTable.get(node.getDenominador().toString());
+		Type numeradorTable = symbolTable.get(node.getNumerador().toString());
+		
+		if (denominadorStack.equals(Type.Identificador)) {
+			if (denominadorTable == null) {
+				throw new RuntimeException("Identificador não encontrado: " + node.getDenominador());
+			}
+			if (!denominadorTable.equals(Type.Identificador)) {	
+				denominadorStack = denominadorTable;
+			} else {
+				//Caso o id não seja de vetor, tratar como numero 
+				symbolTable.replace(node.getDenominador().toString(), Type.Numero);
+				denominadorTable = Type.Numero;
+				denominadorStack = Type.Numero;
+			}
 		}
+		
+		if (numeradorStack.equals(Type.Identificador)) {
+			if (numeradorTable == null) {
+				throw new RuntimeException("Identificador não encontrado: " + node.getNumerador());
+			}
+			if (!numeradorTable.equals(Type.Identificador)) {	
+				numeradorStack = numeradorTable;
+			} else {
+				//Caso o id não seja de vetor, tratar como numero 
+				symbolTable.replace(node.getNumerador().toString(), Type.Numero);
+				numeradorTable = Type.Numero;
+				numeradorStack = Type.Numero;
+			}
+		}
+		
+		// numero / vetor = erro
+		if (denominadorStack.equals(Type.Vetor)) {
+			if (!numeradorStack.equals(Type.Vetor)) {
+				throw new RuntimeException("Um número não pode ser dividido para um vetor");
+			}
+		} 
+		
+		// numero / numero = numero 
+		if (numeradorStack.equals(Type.Numero) && denominadorStack.equals(Type.Numero)) { 
+			symbolTable.replace(getCurrentEquation(), Type.Numero);
+			stack.add(Type.Numero);
+		} 
+
+		// vetor / vetor = vetor 
+		if (numeradorStack.equals(Type.Vetor) && denominadorStack.equals(Type.Vetor)) { 
+			symbolTable.replace(getCurrentEquation(), Type.Vetor);
+			stack.add(Type.Vetor);
+		} 
+		
+		// vetor / numero = vetor
+		if (numeradorStack.equals(Type.Vetor) && denominadorStack.equals(Type.Numero)) { 
+			symbolTable.replace(getCurrentEquation(), Type.Vetor);
+			stack.add(Type.Vetor);
+		} 
+
+		System.out.println("-------------------------------------------------");
+		System.out.println(numeradorStack + " / " + denominadorStack);
 	}
 
 	@Override
@@ -165,23 +250,61 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		System.out.println("-------------------------------------------------");
 		System.out.println("O nó é " + node.getClass().getSimpleName());	
 		
-		Type tipoRight = stack.pop();
-		Type tipoLeft = stack.pop();
+		Type tipoRightStack = stack.pop();
+		Type tipoLeftStack = stack.pop();
 
-		if (!(tipoLeft.equals(Type.Numero) && tipoRight.equals(Type.Numero)) &&
-				//numero * vetor = vetor
-				//!(tipoLeft.equals(Type.Vetor) && tipoRight.equals(Type.Vetor))   &&
-			//se os ids representarem numeros ou um numero e um vetor
-			!(tipoLeft.equals(Type.Identificador) && tipoRight.equals(Type.Identificador)) ) {
-			throw new RuntimeException("Uma multiplicação deve ser entre dois numeros");
-		} else {
-			System.out.println("-------------------------------------------------");
-			System.out.println(tipoLeft + " * " + tipoRight);
-			
-			symbolTable.replace(getCurrentEquation(), tipoLeft);
-			stack.add(tipoLeft);
+		Type tipoRightTable = symbolTable.get(node.getLadoDireito().toString());
+		Type tipoLeftTable = symbolTable.get(node.getLadoEsquerdo().toString());
+		
+		if (tipoRightStack.equals(Type.Identificador)) {
+			if (tipoRightTable == null) {
+				throw new RuntimeException("Identificador não encontrado: " + node.getLadoDireito());
+			}
+			if (!tipoRightTable.equals(Type.Identificador)) {	
+				tipoRightStack = tipoRightTable;
+			} else {
+				//Caso o id não seja de vetor, tratar como numero 
+				symbolTable.replace(node.getLadoDireito().toString(), Type.Numero);
+				tipoRightTable = Type.Numero;
+				tipoRightStack = Type.Numero;
+			}
 		}
 		
+		if (tipoLeftStack.equals(Type.Identificador)) {
+			if (tipoLeftTable == null) {
+				throw new RuntimeException("Identificador não encontrado: " + node.getLadoEsquerdo());
+			}
+			if (!tipoLeftTable.equals(Type.Identificador)) {	
+				tipoLeftStack = tipoLeftTable;
+			} else {
+				//Caso o id não seja de vetor, tratar como numero
+				symbolTable.replace(node.getLadoEsquerdo().toString(), Type.Numero);
+				tipoLeftTable = Type.Numero;
+				tipoLeftStack = Type.Numero;
+			}
+		}
+		
+		// vetor * vetor = erro 
+		if (tipoLeftStack.equals(Type.Vetor) && tipoRightStack.equals(Type.Vetor)) { 
+			throw new RuntimeException("Não é possivel realizar uma multiplicação entre dois vetores" 
+					+ node.getLadoEsquerdo() + "* " + node.getLadoDireito());
+		} 
+		
+		// vetor * numero OU numero * vetor = vetor
+		if ((tipoLeftStack.equals(Type.Vetor) || tipoRightStack.equals(Type.Vetor)) &&
+			(tipoLeftStack.equals(Type.Numero) || tipoRightStack.equals(Type.Numero))) { 
+			symbolTable.replace(getCurrentEquation(), Type.Vetor);
+			stack.add(Type.Vetor);
+		} 
+		
+		// numero * numero = numero 
+		if (tipoLeftStack.equals(Type.Numero) && tipoRightStack.equals(Type.Numero)) { 
+			symbolTable.replace(getCurrentEquation(), Type.Numero);
+			stack.add(Type.Numero);
+		} 
+		
+		System.out.println("-------------------------------------------------");
+		System.out.println(tipoLeftStack + " * " + tipoRightStack);
 	}
 
 	@Override
@@ -219,11 +342,17 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 	
 	@Override
 	public void outAAVetorFaAExp(AAVetorFaAExp node) {
-		// tk_vec fl_chaves \vec{...}
+		// tk_vec fl_chaves '\vec{...}'
 		System.out.println("-------------------------------------------------");
 		System.out.println("O nó é " + node.getClass().getSimpleName());
+		
 		Type typeTable = symbolTable.get(node.toString());
 		Type typeStack = stack.pop();
+		
+		if (typeTable == null) {
+			symbolTable.put(node.toString(), Type.Vetor);
+			typeTable = Type.Vetor;
+		}
 		
 		if ( typeTable != null 
 				&& !typeTable.equals(typeStack)
@@ -241,14 +370,19 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 
 	@Override
 	public void outAAVetorIdFaAExp(AAVetorIdFaAExp node) {
-		// tk_vec tk_identificador \vec{a}
+		// tk_vec tk_identificador '\vec a'
 		System.out.println("-------------------------------------------------");
 		System.out.println("O nó é " + node.getClass().getSimpleName());
 		
 		Type typeTable = symbolTable.get(node.getTkIdentificador().toString());
 		Type typeStack = stack.pop();
 		
-		if ( (typeTable != null && !typeTable.equals(typeStack)) || !typeStack.equals(Type.Vetor) ) {
+		if (typeTable == null) {
+			symbolTable.put(node.getTkIdentificador().toString(), Type.Vetor);
+			typeTable = Type.Vetor;
+		}
+		
+		if (!typeTable.equals(typeStack) || !typeStack.equals(Type.Vetor) ) {
 			throw new RuntimeException("Tipo Vetor esperado: " + typeStack);
 		} else {
 			System.out.println("-------------------------------------------------");
