@@ -24,7 +24,8 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 	public enum Type {
 		Numero(),
 		Vetor(),
-		Identificador();
+		Identificador(),
+		Equacao();
 	}
 	
 	private Hashtable<String, Type> symbolTable = new Hashtable<>();
@@ -90,9 +91,24 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 
 	@Override
 	public void inAAEquacao(AAEquacao node) { 
-		stack.add(Type.Identificador);
-		symbolTable.put(node.getTkIdentificador().toString(), Type.Identificador);
-		setCurrentEquation(node.getTkIdentificador().toString());
+		stack.add(Type.Equacao);
+		if (symbolTable.get(node.getTkIdentificador().toString()) == null) {
+			symbolTable.put(node.getTkIdentificador().toString(), Type.Equacao);
+			setCurrentEquation(node.getTkIdentificador().toString());
+		}
+	}
+	
+	@Override
+	public void inAAListaEquacoesABlocoEquacoes(AAListaEquacoesABlocoEquacoes node) {
+		List<PAEquacao> copy = new ArrayList<PAEquacao>(node.getAEquacao());
+		for (PAEquacao e : copy) {
+			/*
+			 * Regista na tabela de simbolos os identificadores
+			 * das equações dessa lista de equações antes de realizar 
+			 * a DFS padrão do SableCCC
+			 */
+			symbolTable.put(e.getTkIdentificador().toString(), Type.Equacao);
+		}
 	}
 
 	@Override
