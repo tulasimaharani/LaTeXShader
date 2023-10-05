@@ -21,6 +21,7 @@ import latexToGLSL.node.AASomaAExp;
 import latexToGLSL.node.AAVetorFaAExp;
 import latexToGLSL.node.AAVetorIdFaAExp;
 import latexToGLSL.node.AAVetorTridimensionalAExp;
+import latexToGLSL.node.Node;
 import latexToGLSL.node.PAEquacao;
 import latexToGLSL.node.Start;
 
@@ -82,17 +83,6 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 	}
 
 	@Override
-	public void outAAIdAExp(AAIdAExp node) {
-		Type idTable = symbolTable.get(node.toString());
-		if (idTable == null) {
-			stack.add(Type.Identificador);
-			symbolTable.put(node.toString(), Type.Identificador);	
-		} else {
-			stack.add(idTable);
-		}
-	}
-
-	@Override
 	public void outAAIdModificadoAExp(AAIdModificadoAExp node) {
 		String nomeIdModificado = node.getId().toString() + node.getModificador().toString();
 		Type idTable = symbolTable.get(nomeIdModificado);
@@ -103,15 +93,35 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 			stack.add(idTable);
 		}
 	}
-
+	
 	@Override
-	public void inAAEquacao(AAEquacao node) { 
-		stack.add(Type.Equacao);
-		if (symbolTable.get(node.getTkIdentificador().toString()) == null) {
-			symbolTable.put(node.getTkIdentificador().toString(), Type.Equacao);
-			setCurrentEquation(node.getTkIdentificador().toString());
+	public void outAAIdAExp(AAIdAExp node) {
+		Type idTable = symbolTable.get(node.toString());
+		if (idTable == null) {
+			stack.add(Type.Identificador);
+			symbolTable.put(node.toString(), Type.Identificador);	
+		} else if (idTable == Type.Equacao) {
+			//Pula na arvore para o nó referente a equação encontrada
+			String currentEquationTemp = getCurrentEquation();
+			JumpCaseAAListaEquacoesABlocoEquacoes((Node) node, node.toString());
+			idTable = symbolTable.get(node.toString());
+			setCurrentEquation(currentEquationTemp);
 		}
+		stack.add(idTable);
 	}
+	
+    public void JumpCaseAAListaEquacoesABlocoEquacoes(Node node, String idEquacao) {
+		while (!(node instanceof AAListaEquacoesABlocoEquacoes)) {
+			node = (Node) node.parent();
+		}
+		AAListaEquacoesABlocoEquacoes lista = (AAListaEquacoesABlocoEquacoes) node;
+    	List<PAEquacao> copy = new ArrayList<PAEquacao>(lista.getAEquacao());
+        for(PAEquacao e : copy) {
+            if (e.getTkIdentificador().toString().equals(idEquacao)) {
+            	e.apply(this);
+            }
+        }
+    }
 	
 	@Override
 	public void inAAListaEquacoesABlocoEquacoes(AAListaEquacoesABlocoEquacoes node) {
@@ -126,6 +136,33 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		}
 	}
 
+	@Override
+    public void caseAAEquacao(AAEquacao node)
+    {
+        inAAEquacao(node);
+        //Checa a existencia da equação na tabela
+        Type tipoEquacao = symbolTable.get(node.getTkIdentificador().toString());
+		
+        if (tipoEquacao == null || tipoEquacao == Type.Equacao) {
+        	//Inclui na tabela
+			symbolTable.put(node.getTkIdentificador().toString(), Type.Equacao);
+			setCurrentEquation(node.getTkIdentificador().toString());
+			//Passeio normal
+	        if(node.getTkIdentificador() != null)
+	        {
+	            node.getTkIdentificador().apply(this);
+	        }
+	        if(node.getAExp() != null)
+	        {
+	            node.getAExp().apply(this);
+	        }
+	        outAAEquacao(node);
+        } else {
+	        //senão, a equação já foi avaliada
+			//não precisa fazer nada
+		}
+    }
+	
 	@Override
 	public void outAAEquacao(AAEquacao node) {
 		Type tipoTable = symbolTable.get(node.getTkIdentificador().toString());
@@ -466,7 +503,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		}
 		
 		System.out.println("-------------------------------------------------");
-		System.out.println(typeStack + " é um vetor");
+		System.out.println(node.toString() + " é um vetor");
 		
 		symbolTable.replace(getCurrentEquation(), Type.Vetor);
 		stack.add(Type.Vetor);
@@ -484,7 +521,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 			throw new RuntimeException("Um produto escalar deve ser entre dois vetores");
 		} else {
 			System.out.println("-------------------------------------------------");
-			System.out.println(tipoDireito + " cdot(escalar) " + tipoEsquerdo);
+			System.out.println(node.getLadoEsquerdo() + " cdot(escalar) " + node.getLadoEsquerdo());
 			
 			symbolTable.replace(getCurrentEquation(), Type.Numero);
 			stack.add(Type.Numero);
@@ -519,10 +556,6 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		aaDivAExp.setDenominador(node.getDenominador());
 		aaDivAExp.setNumerador(node.getNumerador());
 		outAADivAExp(aaDivAExp);
-	}
-
-
-	
-	
+	}	
 
 }
