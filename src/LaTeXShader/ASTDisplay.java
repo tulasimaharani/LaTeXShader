@@ -1,4 +1,4 @@
-package latexToGLSL;
+package LaTeXShader;
 
 /*
  * NOTES
@@ -10,8 +10,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
-import latexToGLSL.analysis.*;
-import latexToGLSL.node.*;
+import LaTeXShader.analysis.*;
+import LaTeXShader.node.*;
 
 
 public class ASTDisplay extends DepthFirstAdapter

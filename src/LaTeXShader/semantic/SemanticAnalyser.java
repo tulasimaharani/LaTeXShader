@@ -1,32 +1,32 @@
-package latexToGLSL.semantic;
+package LaTeXShader.semantic;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Stack;
 
-import latexToGLSL.analysis.DepthFirstAdapter;
-import latexToGLSL.node.AADimAExp;
-import latexToGLSL.node.AADivAExp;
-import latexToGLSL.node.AAEquacao;
-import latexToGLSL.node.AAEquacaoTrigAExp;
-import latexToGLSL.node.AAEquacaoTrigPot;
-import latexToGLSL.node.AAFaCdotAExp;
-import latexToGLSL.node.AAFaTimesAExp;
-import latexToGLSL.node.AAFmFracAExp;
-import latexToGLSL.node.AAIdAExp;
-import latexToGLSL.node.AAIdModificadoAExp;
-import latexToGLSL.node.AAListaEquacoesABlocoEquacoes;
-import latexToGLSL.node.AAMultAExp;
-import latexToGLSL.node.AANumeroAExp;
-import latexToGLSL.node.AAPotAExp;
-import latexToGLSL.node.AASomaAExp;
-import latexToGLSL.node.AAVetorFaAExp;
-import latexToGLSL.node.AAVetorIdFaAExp;
-import latexToGLSL.node.AAVetorTridimensionalAExp;
-import latexToGLSL.node.Node;
-import latexToGLSL.node.PAEquacao;
-import latexToGLSL.node.Start;
+import LaTeXShader.analysis.DepthFirstAdapter;
+import LaTeXShader.node.AADimAExp;
+import LaTeXShader.node.AADivAExp;
+import LaTeXShader.node.AAEquacao;
+import LaTeXShader.node.AAEquacaoTrigAExp;
+import LaTeXShader.node.AAEquacaoTrigPot;
+import LaTeXShader.node.AAFaCdotAExp;
+import LaTeXShader.node.AAFaTimesAExp;
+import LaTeXShader.node.AAFmFracAExp;
+import LaTeXShader.node.AAIdAExp;
+import LaTeXShader.node.AAIdModificadoAExp;
+import LaTeXShader.node.AAListaEquacoesABlocoEquacoes;
+import LaTeXShader.node.AAMultAExp;
+import LaTeXShader.node.AANumeroAExp;
+import LaTeXShader.node.AAPotAExp;
+import LaTeXShader.node.AASomaAExp;
+import LaTeXShader.node.AAVetorFaAExp;
+import LaTeXShader.node.AAVetorIdFaAExp;
+import LaTeXShader.node.AAVetorTridimensionalAExp;
+import LaTeXShader.node.Node;
+import LaTeXShader.node.PAEquacao;
+import LaTeXShader.node.Start;
 
 public class SemanticAnalyser extends DepthFirstAdapter {
 
@@ -44,22 +44,6 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 
 	public void setCurrentEquation(String currentEquation) {
 		this.currentEquation = currentEquation;
-	}
-
-	public Type verifyTypeOnTable(String nodeName) {
-		return symbolTable.get(nodeName);
-	}
-
-	public Boolean isIdentificador(String nodeName) {
-		return symbolTable.get(nodeName).equals(Type.Identificador);
-	}
-
-	public Boolean isNumero(String nodeName) {
-		return symbolTable.get(nodeName).equals(Type.Numero);
-	}
-
-	public Boolean isVetor(String nodeName) {
-		return symbolTable.get(nodeName).equals(Type.Vetor);
 	}
 
 	@Override
@@ -346,7 +330,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 
 	@Override
 	public void outAAPotAExp(AAPotAExp node) {
-		// numerador / denominador
+		// base ^ expoente
 		System.out.println("-------------------------------------------------");
 		System.out.println("O nó é " + node.getClass().getSimpleName());
 
@@ -403,6 +387,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		System.out.println("-------------------------------------------------");
 		System.out.println(node.getBase() + " ^ " + node.getExpoente());
 	}
+
 	@Override
 	public void outAAVetorTridimensionalAExp(AAVetorTridimensionalAExp node) {
 		// (x, y, z)

@@ -1,7 +1,7 @@
 
 /*************************************************************************/
   
-Package latexToGLSL;
+Package LaTeXShader;
 
 /*************************************************************************/
     
@@ -71,7 +71,7 @@ Helpers
  tudo = [0..255];
  
  
-/* Retorno */
+/* Caracteres de Retorno */
 
 
  rc = 13; //carriage return
@@ -122,7 +122,7 @@ Tokens
  tk_chave_right = '}';
  tk_underline = '_';
  tk_virgula = ',';
- tk_pipe = '|';
+ tk_pipe = '|';  // para o modulo
  tk_maior = '>';
  tk_menor = '<';
  tk_maiorigual = '>=';
@@ -159,7 +159,7 @@ Tokens
  tk_leftarrow = '\leftarrow'; 
  tk_la_gets = '\gets';
  tk_rightarrow = '\rightarrow';
- tk_double_pipe = '\|';
+ tk_double_pipe = '\|';   // para o modulo
  
  
 /* Funções Trigonométricas */ 
@@ -586,11 +586,11 @@ Abstract Syntax Tree
 
     a_bloco_equacoes =
      {a_equacao} a_equacao 			|
-     {a_lista_equacoes} a_equacao* 
+     {a_lista_equacoes} a_equacao* 	 
      ;
      
     a_equacao = 
-	 tk_identificador a_exp 
+	 tk_identificador a_exp    
 	 ;
 	 
 	a_equacao_trig_pot =
@@ -642,7 +642,7 @@ Abstract Syntax Tree
      {a_fm_min}               a_exp*                                        | 
      {a_fm_max}               a_exp*                                        | 
      {a_fm_sqrt}              a_exp                                         | 
-     {a_fm_frac}              [numerador]:a_exp [denominador]:a_exp         |  
+     {a_fm_frac}              [numerador]:a_exp [denominador]:a_exp         |
      {a_fm_integral}          [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
      {a_fm_lim} 			  tk_lim tk_underline tk_chave_left tk_identificador tk_to tk_infty tk_chave_right 
      ;

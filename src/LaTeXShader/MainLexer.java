@@ -1,9 +1,10 @@
-package latexToGLSL;
+package LaTeXShader;
 
 import java.io.*;
 
-import latexToGLSL.lexer.*;
-import latexToGLSL.node.*;
+import LaTeXShader.lexer.*;
+import LaTeXShader.node.*;
+
 import java.io.* ;
 
 public class MainLexer

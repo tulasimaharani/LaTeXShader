@@ -1,9 +1,9 @@
-package latexToGLSL;
+package LaTeXShader;
 
-import latexToGLSL.analysis.*;
-import latexToGLSL.lexer.*;
-import latexToGLSL.node.*;
-import latexToGLSL.parser.*;
+import LaTeXShader.analysis.*;
+import LaTeXShader.lexer.*;
+import LaTeXShader.node.*;
+import LaTeXShader.parser.*;
 
 
 public class ASTPrinter extends DepthFirstAdapter {

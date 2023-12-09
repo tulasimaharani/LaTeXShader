@@ -1,16 +1,16 @@
-package latexToGLSL;
+package LaTeXShader;
 
 import java.io.*;
 
-import latexToGLSL.lexer.*;
-import latexToGLSL.node.*;
-import latexToGLSL.parser.*;
-import latexToGLSL.semantic.SemanticAnalyser;
+import LaTeXShader.lexer.*;
+import LaTeXShader.node.*;
+import LaTeXShader.parser.*;
+import LaTeXShader.semantic.SemanticAnalyser;
 
 public class MainParser {
 	public static void main(String[] args) {
 		try {
-			String arquivo = "src/exemplos/vetor3.tex";
+			String arquivo = "src/exemplos/cdot.tex";
 			//src/exemplos/eq_AshikhminShirleyModel.tex
 			//src/exemplos/eq_BlinnPhongModel.tex
 			//src/exemplos/eq_CookTorranceModel.tex
