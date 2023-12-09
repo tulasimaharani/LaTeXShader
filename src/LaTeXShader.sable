@@ -56,12 +56,6 @@ Helpers
  '\Omega'	  ;
 
 
-/* Expressoes Numéricas */
-
-
- exponencial = '\exp'; //constante de euler
-
-
 /* Caracteres */
 
 
@@ -77,11 +71,8 @@ Helpers
  rc = 13; //carriage return
  nl = 10; //new line
  tab = 9;  //tabulacao
- tudo_sem_retorno = [tudo - [rc + nl]];
- tudo_sem_chave = [tudo - '}'];
- tudo_sem_aspas = [tudo - '''];
  fl_espaco = '\\';
- 
+ tudo_sem_retorno = [tudo - [rc + nl]];
 
 /*************************************************************************/
 
@@ -96,12 +87,6 @@ Tokens
  tk_array = 'array';
  tk_begin = '\begin';
  tk_end = '\end';
- tk_fl_lbrace = '\lbrace';
- tk_fl_rbrace = '\rbrace';
- tk_fl_operatorname = '\operatorname';
- tk_fl_displaystyle = '\displaystyle'; 
- tk_fl_mathbf = '\mathbf';
- tk_fl_sifao = '$';
  
 
 /* Operadores */
@@ -111,8 +96,7 @@ Tokens
  tk_soma = '+';
  tk_subt = '-';
  tk_mult = '*';
- tk_div = '/';
- tk_mod = '%';
+ tk_div = '/'; 
  tk_pot = '^';
  tk_par_left = '(';
  tk_par_right  = ')';
@@ -123,10 +107,6 @@ Tokens
  tk_underline = '_';
  tk_virgula = ',';
  tk_pipe = '|';  // para o modulo
- tk_maior = '>';
- tk_menor = '<';
- tk_maiorigual = '>=';
- tk_menorigual = '<=';
  
  
 /* Funções Algebra Linear */ 
@@ -135,8 +115,6 @@ Tokens
  tk_times = '\times'; /*cross product*/ 
  tk_cdot = '\cdot';
  tk_vec = '\vec';
- tk_sum = '\sum';
- tk_prod = '\prod';
  
  
 /* Funções Matemáticas */ 
@@ -145,24 +123,13 @@ Tokens
  tk_min = '\min';
  tk_max = '\max';
  tk_frac = '\frac';
- tk_log = '\log';
- tk_ln = '\ln';
- tk_lg = '\lg';
  tk_sqrt = '\sqrt';
- tk_lim = '\lim';
- tk_to = '\to'; 
- tk_infty = '\infty';
- tk_integral = '\int';
- tk_degree = '\circ';
- tk_unf_letra = '\mathrm';
- tk_pipe_mid = '\mid';
- tk_leftarrow = '\leftarrow'; 
- tk_la_gets = '\gets';
- tk_rightarrow = '\rightarrow';
  tk_double_pipe = '\|';   // para o modulo
+ tk_euler = '\exp';
  
  
 /* Funções Trigonométricas */ 
+	
 	
  tk_cos = '\cos';
  tk_sin = '\sin';
@@ -183,7 +150,7 @@ Tokens
 /* Caracteres */
 
 
- tk_numero = (digito+) | (digito+ '.' digito+) | exponencial;
+ tk_numero = (digito+) | (digito+ '.' digito+);
  tk_identificador = (letra+) | alfabeto_grego; 
 
 
@@ -192,17 +159,19 @@ Tokens
 
  vazio = (espaco | rc | nl | tab)+;
  espaco = fl_espaco+;
-/* comentario_linha = ('--' tudo_sem_retorno*); */
-/* comentario_bloco = ('{' tudo_sem_chave* '}')+; */
+ comentario_linha = ('%' tudo_sem_retorno*);
  
  
 /*************************************************************************/
+
 
 Ignored Tokens
 
- vazio, espaco;
+ vazio, espaco, comentario_linha;
+
 
 /*************************************************************************/
+
 
 Productions 
          
@@ -235,7 +204,7 @@ Productions
      
  equacao
          {-> a_equacao } =
-     {equacao} tk_fl_displaystyle? tk_identificador tk_igual exp
+     {equacao} tk_identificador tk_igual exp
          {-> New a_equacao ( tk_identificador, exp.a_exp ) }
      ;
 
@@ -272,10 +241,7 @@ Productions
          {-> New a_exp.a_mult ( fator.a_exp, fator_expo.a_exp )  }   |
 
      {div} fator tk_div fator_expo 
-         {-> New a_exp.a_div ( fator.a_exp, fator_expo.a_exp )  }    |
-
-     {mod} fator tk_mod fator_expo 
-         {-> New a_exp.a_mod ( fator.a_exp, fator_expo.a_exp )  }  
+         {-> New a_exp.a_div ( fator.a_exp, fator_expo.a_exp )  }    
      ;
 
  fator_expo
@@ -343,13 +309,7 @@ Productions
          {-> fl_matematica.a_exp }   |
 
      {equacao_trig} equacao_trig 
-         {-> equacao_trig.a_exp }    |
-
-     {fl_operador_custom} tk_fl_operatorname tk_chave_left tk_identificador tk_chave_right tk_par_left parametros tk_par_right 
-         {-> New a_exp.a_fl_operador_custom (tk_identificador,  [parametros.a_exp]  )  }   |
-
-     {fl_style} tk_fl_displaystyle tk_identificador 
-         {-> New a_exp.a_fl_style (tk_fl_displaystyle , tk_identificador  )  }  
+         {-> equacao_trig.a_exp }      
      ;
 
  fl_algebra
@@ -360,12 +320,6 @@ Productions
 
      {cdot} fa_cdot 
          {-> fa_cdot.a_exp }    |
-
-     {sum} fa_sum 
-         {-> fa_sum.a_exp }     |
-
-     {prod} fa_prod 
-         {-> fa_prod.a_exp }    |
 
      {vec} fa_vec 
          {-> fa_vec.a_exp }   
@@ -383,20 +337,6 @@ Productions
 
      [lado_esquerdo]: fl_chaves tk_cdot [lado_direito]: fl_chaves 
          {-> New a_exp.a_fa_cdot ( lado_esquerdo.a_exp , lado_direito.a_exp )  }  
-     ;
-
- fa_sum
-         {-> a_exp  } =
-
-     tk_sum tk_underline [lado_esquerdo]: fl_chaves tk_pot [lado_direito]: fl_chaves 
-         {-> New a_exp.a_fa_sum ( lado_esquerdo.a_exp , lado_direito.a_exp ) }  
-     ;
-
- fa_prod
-         {-> a_exp  } =
-
-     tk_prod tk_underline [lado_esquerdo]: fl_chaves tk_pot [lado_direito]: fl_chaves 
-         {-> New a_exp.a_fa_prod ( lado_esquerdo.a_exp , lado_direito.a_exp )  }  
      ;
 
  fa_vec
@@ -424,11 +364,8 @@ Productions
      {fm_sqrt} fm_sqrt 
          {-> fm_sqrt.a_exp }   |
 
-     {fm_lim} fm_lim 
-         {-> fm_lim.a_exp }    |
-
-     {fm_integral} fm_integral 
-         {-> fm_integral.a_exp } 
+     {fm_euler} fm_euler 
+         {-> fm_euler.a_exp } 
      ;
 
  fm_min
@@ -459,18 +396,11 @@ Productions
          {-> New a_exp.a_fm_sqrt ( fl_chaves.a_exp )  }  
      ;
 
- fm_lim
+ fm_euler
          {-> a_exp  } =
 
-     tk_lim tk_underline tk_chave_left tk_identificador tk_to tk_infty tk_chave_right 
-         {-> New a_exp.a_fm_lim ( tk_lim , tk_underline , tk_chave_left , tk_identificador , tk_to , tk_infty , tk_chave_right  )  }  
-     ;
-
- fm_integral
-         {-> a_exp  } =
-
-     tk_integral tk_underline [lado_esquerdo]: fl_chaves tk_pot [lado_direito]: fl_chaves 
-         {-> New a_exp.a_fm_integral ( lado_esquerdo.a_exp , lado_direito.a_exp  )  }  
+     tk_euler fl_parenteses?
+         {-> New a_exp.a_fm_euler ( fl_parenteses.a_exp )  }  
      ;
 
  fl_trigonometrica
@@ -522,15 +452,8 @@ Productions
  equacao_trig
          {-> a_exp } =
 
-     {equacao_trig} fl_trigonometrica equacao_trig_pot? fl_chaves 
-         {-> New a_exp.a_equacao_trig ( fl_trigonometrica.a_fl_trigonometrica , equacao_trig_pot.a_equacao_trig_pot , fl_chaves.a_exp  )  }  
-     ;
-
- equacao_trig_pot
-         {-> a_equacao_trig_pot  } =
-
-     tk_pot fl_chaves 
-         {-> New a_equacao_trig_pot ( fl_chaves.a_exp )  }  
+     {equacao_trig} fl_trigonometrica fl_chaves 
+         {-> New a_exp.a_equacao_trig ( fl_trigonometrica.a_fl_trigonometrica , fl_chaves.a_exp  )  }  
      ;
 
  bloco_inicio  =
@@ -593,10 +516,6 @@ Abstract Syntax Tree
 	 tk_identificador a_exp    
 	 ;
 	 
-	a_equacao_trig_pot =
-      a_exp 
-     ;
-     
 	a_fl_trigonometrica =
      {a_cos}		tk_cos		| 
      {a_sin} 		tk_sin 		| 
@@ -618,7 +537,6 @@ Abstract Syntax Tree
 	 {a_soma}                 [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
  	 {a_dim}                  [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
  	 {a_mult}                 [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
-  	 {a_mod}                  [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
      {a_div}                  [numerador]:a_exp [denominador]:a_exp         |
      {a_pot}                  [base]:a_exp [expoente]:a_exp                 |
      {a_numero}               tk_numero 									|
@@ -632,19 +550,14 @@ Abstract Syntax Tree
      {a_id}                   tk_identificador                              |
      {a_id_modificado}        [id]:a_exp [modificador]:a_exp                |
      {a_vetor_tridimensional} [x]:a_exp [y]:a_exp [z]:a_exp                 |
-     {a_equacao_trig}         a_fl_trigonometrica a_equacao_trig_pot? a_exp | 
-     {a_fl_operador_custom}   tk_identificador a_exp*                       | 
-     {a_fl_style}             tk_fl_displaystyle tk_identificador           |
+     {a_equacao_trig}         a_fl_trigonometrica a_exp                     | 
  	 {a_fa_times}             [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
  	 {a_fa_cdot}              [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
- 	 {a_fa_sum}               [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
- 	 {a_fa_prod}              [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
      {a_fm_min}               a_exp*                                        | 
      {a_fm_max}               a_exp*                                        | 
      {a_fm_sqrt}              a_exp                                         | 
-     {a_fm_frac}              [numerador]:a_exp [denominador]:a_exp         |
-     {a_fm_integral}          [lado_esquerdo]:a_exp [lado_direito]:a_exp    |
-     {a_fm_lim} 			  tk_lim tk_underline tk_chave_left tk_identificador tk_to tk_infty tk_chave_right 
+     {a_fm_euler}             a_exp?                                        | 
+     {a_fm_frac}              [numerador]:a_exp [denominador]:a_exp         
      ;
      
     
