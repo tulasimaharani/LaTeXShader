@@ -10,15 +10,20 @@ import LaTeXShader.node.AADimAExp;
 import LaTeXShader.node.AADivAExp;
 import LaTeXShader.node.AAEquacao;
 import LaTeXShader.node.AAEquacaoTrigAExp;
-import LaTeXShader.node.AAEquacaoTrigPot;
 import LaTeXShader.node.AAFaCdotAExp;
 import LaTeXShader.node.AAFaTimesAExp;
+import LaTeXShader.node.AAFmEulerAExp;
 import LaTeXShader.node.AAFmFracAExp;
+import LaTeXShader.node.AAFmMaxAExp;
+import LaTeXShader.node.AAFmMinAExp;
+import LaTeXShader.node.AAFmSqrtAExp;
 import LaTeXShader.node.AAIdAExp;
 import LaTeXShader.node.AAIdModificadoAExp;
 import LaTeXShader.node.AAListaEquacoesABlocoEquacoes;
 import LaTeXShader.node.AAMultAExp;
+import LaTeXShader.node.AANegativoAExp;
 import LaTeXShader.node.AANumeroAExp;
+import LaTeXShader.node.AAParametrosAExp;
 import LaTeXShader.node.AAPotAExp;
 import LaTeXShader.node.AASomaAExp;
 import LaTeXShader.node.AAVetorFaAExp;
@@ -88,7 +93,6 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 	public void outAAIdAExp(AAIdAExp node) {
 		Type idTable = symbolTable.get(node.toString());
 		if (idTable == null) {
-			stack.add(Type.Identificador);
 			symbolTable.put(node.toString(), Type.Identificador);
 			idTable = Type.Identificador;
 		} else if (idTable == Type.Equacao) {
@@ -369,7 +373,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 
 		// ( numero OU vetor ) ^ vetor = erro
 		if (expoenteStack.equals(Type.Vetor)) {
-			throw new RuntimeException("Um número não pode ser dividido para um vetor");
+			throw new RuntimeException("Um vetor não pode ser o expoente de uma potência.");
 		}
 
 		// numero ^ numero = numero
@@ -385,7 +389,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		}
 
 		System.out.println("-------------------------------------------------");
-		System.out.println(node.getBase() + " ^ " + node.getExpoente());
+		System.out.println("(" + node.getBase() + ")" + " ^ " + "(" + node.getExpoente() + ")");
 	}
 
 	@Override
@@ -457,15 +461,19 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 				symbolTable.put(node.toString(), Type.Vetor);
 				typeStack = Type.Vetor;
 			}
+			if (typeTable.equals(Type.Identificador)) {
+				symbolTable.replace(node.toString(), Type.Vetor);
+				typeStack = Type.Vetor;
+			}
 			if (typeTable.equals(Type.Numero)) {
 				throw new RuntimeException("O identificador " + node.getAExp() + "já foi definido como número.");
 			}
 		}
 		System.out.println("-------------------------------------------------");
-		System.out.println(typeStack + " é um vetor");
-
+		System.out.println(node.toString() + " é um vetor");
+		
 		symbolTable.replace(getCurrentEquation(), Type.Vetor);
-		stack.add(Type.Vetor);
+		stack.add(typeStack);
 	}
 
 	@Override
@@ -506,7 +514,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 			throw new RuntimeException("Um produto escalar deve ser entre dois vetores");
 		} else {
 			System.out.println("-------------------------------------------------");
-			System.out.println(node.getLadoEsquerdo() + " cdot(escalar) " + node.getLadoEsquerdo());
+			System.out.println(node.getLadoEsquerdo() + " cdot(escalar) " + node.getLadoDireito());
 
 			symbolTable.replace(getCurrentEquation(), Type.Numero);
 			stack.add(Type.Numero);
@@ -530,6 +538,36 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 			symbolTable.replace(getCurrentEquation(), Type.Vetor);
 			stack.add(Type.Vetor);
 		}
+	}
+
+	@Override
+	public void outAAEquacaoTrigAExp(AAEquacaoTrigAExp node) {
+		// fl_trigonometrica fl_chaves '\sen{...}'
+		System.out.println("-------------------------------------------------");
+		System.out.println("O nó é " + node.getClass().getSimpleName());
+
+		Type typeStack = stack.pop();
+
+		if (typeStack.equals(Type.Vetor)) {
+			throw new RuntimeException("A expressão " + node.getAFlTrigonometrica() + " deve ser aplicada em um número.");
+		}
+
+		if (typeStack.equals(Type.Identificador)) {
+			Type typeTable = symbolTable.get(node.toString());
+			if (typeTable == null) {
+				symbolTable.put(node.toString(), Type.Numero);
+				typeStack = Type.Numero;
+			} else if (typeTable.equals(Type.Identificador)) {
+				symbolTable.replace(node.toString(), Type.Numero);
+				typeStack = Type.Numero;
+			} 
+		}
+		
+		System.out.println("-------------------------------------------------");
+		System.out.println(node.toString() + " é um numero");
+		
+		symbolTable.replace(getCurrentEquation(), Type.Numero);
+		stack.add(typeStack);
 	}
 
 	@Override
@@ -609,5 +647,5 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		System.out.println("-------------------------------------------------");
 		System.out.println(numeradorStack + " / " + denominadorStack);
 	}
-	
+
 }
