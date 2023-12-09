@@ -1,7 +1,7 @@
 \begin{equation}
-     f = \frac{\rho_{s}}
-              {\sqrt{({\vec{n}}\cdot{\vec{\omega_{i}}}) *
-                     ({\vec{n}}\cdot{\vec{\omega_{o}}})}} * 
-         \frac{\exp(-\tan{(\theta_{h}/\alpha^2)}^{2})}
-              {4*\pi*\alpha^2}
+    f = \frac{\rho_{d}}{\pi} + \frac{\rho_{s}}{8*\pi} *
+        \frac{({\vec{n}}\cdot{\vec{h}})}
+             {({\vec{\omega_{o}}}\cdot{\vec{h}}) *
+               \max(({\vec{n}}\cdot{\vec{\omega_{i}}}),
+                   ({\vec{n}}\cdot{\vec{\omega_{o}}}))}
 \end{equation}
