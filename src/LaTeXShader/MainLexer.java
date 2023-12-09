@@ -13,11 +13,11 @@ public class MainLexer
 	{
 		try
 		{
-			String arquivo = "src/exemplos/eq_CookTorranceModel.tex";
-			//src/exemplos/eq_AshikhminShirleyModel.tex
-			//src/exemplos/eq_BlinnPhongModel.tex
-			//src/exemplos/eq_CookTorranceModel.tex
-			//src/exemplos/eq_WardModel.tex
+			String arquivo = "src/LaTeXShader/codeExamples/eq_CookTorranceModel.tex";
+			//src/LaTeXShader/codeExamples/eq_AshikhminShirleyModel.tex
+			//src/LaTeXShader/codeExamples/eq_BlinnPhongModel.tex
+			//src/LaTeXShader/codeExamples/eq_CookTorranceModel.tex
+			//src/LaTeXShader/codeExamples/eq_WardModel.tex
 			Lexer lexer =
 					new Lexer(
 							new PushbackReader(  
