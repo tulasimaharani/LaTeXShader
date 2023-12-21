@@ -96,7 +96,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 			symbolTable.put(node.toString(), Type.Identificador);
 			idTable = Type.Identificador;
 		} else if (idTable == Type.Equacao) {
-			// Pula na arvore para o nó referente a equação encontrada
+			// Pula na árvore para o nó referente à equação encontrada
 			String currentEquationTemp = getCurrentEquation();
 			JumpCaseAAListaEquacoesABlocoEquacoes((Node) node, node.toString());
 			idTable = symbolTable.get(node.toString());
@@ -124,7 +124,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		for (PAEquacao e : copy) {
 			/*
 			 * Regista na tabela de simbolos os identificadores das equações dessa lista de
-			 * equações antes de realizar a DFS padrão do SableCCC
+			 * equações antes de realizar a DFS padrão do SableCC
 			 */
 			symbolTable.put(e.getTkIdentificador().toString(), Type.Equacao);
 		}
@@ -133,7 +133,7 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 	@Override
 	public void caseAAEquacao(AAEquacao node) {
 		inAAEquacao(node);
-		// Checa a existencia da equação na tabela
+		// Checa a existência da equação na tabela
 		Type tipoEquacao = symbolTable.get(node.getTkIdentificador().toString());
 
 		if (tipoEquacao == null || tipoEquacao == Type.Equacao) {
@@ -648,4 +648,40 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		System.out.println(numeradorStack + " / " + denominadorStack);
 	}
 
+	@Override
+	public void outAAParametrosAExp(AAParametrosAExp node) {
+		// TODO todos os parametros de uma função devem ser do mesmo tipo
+		super.outAAParametrosAExp(node);
+	}
+
+	@Override
+	public void outAANegativoAExp(AANegativoAExp node) {
+		// TODO acho q n precisa
+		super.outAANegativoAExp(node);
+	}
+
+	@Override
+	public void outAAFmMinAExp(AAFmMinAExp node) {
+		// TODO Auto-generated method stub
+		super.outAAFmMinAExp(node);
+	}
+
+	@Override
+	public void outAAFmMaxAExp(AAFmMaxAExp node) {
+		// TODO Auto-generated method stub
+		super.outAAFmMaxAExp(node);
+	}
+
+	@Override
+	public void outAAFmSqrtAExp(AAFmSqrtAExp node) {
+		// TODO só pode ser aplicada sobre um numero
+		super.outAAFmSqrtAExp(node);
+	}
+
+	@Override
+	public void outAAFmEulerAExp(AAFmEulerAExp node) {
+		// TODO ele é um numero, então segue as regras de numero
+		super.outAAFmEulerAExp(node);
+	}
+	
 }
