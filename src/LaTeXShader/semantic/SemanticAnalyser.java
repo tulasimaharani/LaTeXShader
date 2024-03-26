@@ -2,7 +2,9 @@ package LaTeXShader.semantic;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import LaTeXShader.analysis.DepthFirstAdapter;
@@ -12,18 +14,12 @@ import LaTeXShader.node.AAEquacao;
 import LaTeXShader.node.AAEquacaoTrigAExp;
 import LaTeXShader.node.AAFaCdotAExp;
 import LaTeXShader.node.AAFaTimesAExp;
-import LaTeXShader.node.AAFmEulerAExp;
 import LaTeXShader.node.AAFmFracAExp;
-import LaTeXShader.node.AAFmMaxAExp;
-import LaTeXShader.node.AAFmMinAExp;
-import LaTeXShader.node.AAFmSqrtAExp;
 import LaTeXShader.node.AAIdAExp;
 import LaTeXShader.node.AAIdModificadoAExp;
 import LaTeXShader.node.AAListaEquacoesABlocoEquacoes;
 import LaTeXShader.node.AAMultAExp;
-import LaTeXShader.node.AANegativoAExp;
 import LaTeXShader.node.AANumeroAExp;
-import LaTeXShader.node.AAParametrosAExp;
 import LaTeXShader.node.AAPotAExp;
 import LaTeXShader.node.AASomaAExp;
 import LaTeXShader.node.AAVetorFaAExp;
@@ -63,6 +59,20 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 		System.out.println("-------------------------------------------------");
 		System.out.println("Fim da análise semântica");
 		System.out.println("-------------------------------------------------");
+		
+		//Imprime a tabela de símbolos no console
+		Iterator<Map.Entry<String, Type>> itr = symbolTable.entrySet().iterator();
+		 
+		Map.Entry<String, Type> entry = null;
+		System.out.println("Tabela de Símbolos");
+		System.out.println("-------------------------------------------------");
+		while(itr.hasNext()){
+		    
+		    entry = itr.next();
+		    System.out.println( entry.getKey() + " -> " + entry.getValue() );
+		}
+		System.out.println("-------------------------------------------------");
+		
 		super.outStart(node);
 	}
 
@@ -646,42 +656,6 @@ public class SemanticAnalyser extends DepthFirstAdapter {
 	
 		System.out.println("-------------------------------------------------");
 		System.out.println(numeradorStack + " / " + denominadorStack);
-	}
-
-	@Override
-	public void outAAParametrosAExp(AAParametrosAExp node) {
-		// TODO todos os parametros de uma função devem ser do mesmo tipo
-		super.outAAParametrosAExp(node);
-	}
-
-	@Override
-	public void outAANegativoAExp(AANegativoAExp node) {
-		// TODO acho q n precisa
-		super.outAANegativoAExp(node);
-	}
-
-	@Override
-	public void outAAFmMinAExp(AAFmMinAExp node) {
-		// TODO Auto-generated method stub
-		super.outAAFmMinAExp(node);
-	}
-
-	@Override
-	public void outAAFmMaxAExp(AAFmMaxAExp node) {
-		// TODO Auto-generated method stub
-		super.outAAFmMaxAExp(node);
-	}
-
-	@Override
-	public void outAAFmSqrtAExp(AAFmSqrtAExp node) {
-		// TODO só pode ser aplicada sobre um numero
-		super.outAAFmSqrtAExp(node);
-	}
-
-	@Override
-	public void outAAFmEulerAExp(AAFmEulerAExp node) {
-		// TODO ele é um numero, então segue as regras de numero
-		super.outAAFmEulerAExp(node);
 	}
 	
 }
